@@ -1,4 +1,10 @@
-﻿
+﻿/**
+ * logger - logs information to a file and automatically deletes old log files
+ * @Author:  Rosa Hilda Melendez <rmelendez@mckinneytexas.org>
+ * @Date: 2016-10-27
+ * @Version:  1.0
+ */
+
 using System;
 using System.Diagnostics;
 using System.IO;

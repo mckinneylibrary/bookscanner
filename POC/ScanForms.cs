@@ -1,4 +1,11 @@
-﻿using Org.BouncyCastle.Tls.Crypto;
+﻿/**
+ * Main Scanner Form - this form is up on the screen all of the time except when user is entering the e-mail information.
+ * @Author:  Rosa Hilda Melendez <rmelendez@mckinneytexas.org>
+ * @Date: 2016-10-27
+ * @Version:  1.0
+ */
+
+using Org.BouncyCastle.Tls.Crypto;
 using PdfiumViewer;
 using System;
 using System.Diagnostics;

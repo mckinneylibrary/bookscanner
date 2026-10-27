@@ -1,4 +1,11 @@
-﻿using Amazon.Auth.AccessControlPolicy;
+﻿/**
+ * Image Preview Form - Displays the BMP scanned pages to user
+ * @Author:  Rosa Hilda Melendez <rmelendez@mckinneytexas.org>
+ * @Date: 2016-10-27
+ * @Version:  1.0
+ */
+
+using Amazon.Auth.AccessControlPolicy;
 using System;
 using System.Drawing;
 using System.Drawing.Imaging;

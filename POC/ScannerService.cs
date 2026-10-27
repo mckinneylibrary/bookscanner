@@ -1,4 +1,11 @@
-﻿using NTwain;
+﻿/**
+ * Scanner servies, datasource, twain connections
+ * @Author:  Rosa Hilda Melendez <rmelendez@mckinneytexas.org>
+ * @Date: 2016-10-27
+ * @Version:  1.0
+ */
+
+using NTwain;
 using NTwain.Data;
 using PdfSharp.Drawing;
 using PdfSharp.Pdf;

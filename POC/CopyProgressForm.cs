@@ -1,4 +1,11 @@
-﻿using System;
+﻿/**
+ * Copy Progress Form - displays status of copy to USB progress and other progress messages.
+ * @Author:  Rosa Hilda Melendez <rmelendez@mckinneytexas.org>
+ * @Date: 2016-10-27
+ * @Version:  1.0
+ */
+
+using System;
 using System.Drawing;
 using System.Windows.Forms;
 

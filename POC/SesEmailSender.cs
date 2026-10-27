@@ -1,4 +1,11 @@
-﻿using Amazon;
+﻿/**
+ * Amazon SES email sending fuctionality
+ * @Author:  Rosa Hilda Melendez <rmelendez@mckinneytexas.org>
+ * @Date: 2016-10-27
+ * @Version:  1.0
+ */
+
+using Amazon;
 using Amazon.SimpleEmail;
 using Amazon.SimpleEmail.Model;
 using MimeKit;

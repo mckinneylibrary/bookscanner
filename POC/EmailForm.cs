@@ -1,4 +1,11 @@
-﻿using System;
+﻿/**
+ * Email Form - User interface for entering email information
+ * @Author:  Rosa Hilda Melendez <rmelendez@mckinneytexas.org>
+ * @Date: 2016-10-27
+ * @Version:  1.0
+ */
+
+using System;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
