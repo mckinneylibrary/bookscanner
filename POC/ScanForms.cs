@@ -5,16 +5,18 @@
  * @Version:  1.0
  */
 
-using Org.BouncyCastle.Tls.Crypto;
+using NTwain.Data;
 using PdfiumViewer;
 using System;
+using System.Configuration;
 using System.Diagnostics;
 using System.Drawing;
-using System.Drawing.Imaging;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Windows.Media.Media3D;
+
+
+
 
 
 namespace Scanner
@@ -46,7 +48,8 @@ namespace Scanner
         private GroupBox colorModeGroup;
         private RadioButton colorRadioButton;
         private RadioButton grayscaleRadioButton;
-        private RadioButton blackWhiteRadioButton;
+        private RadioButton blackWhiteTextRadioButton;
+        private RadioButton blackWhiteIMGRadioButton;
 
         private GroupBox dpiGroup;
         private RadioButton standardDpiRadioButton;
@@ -81,8 +84,6 @@ namespace Scanner
         // Main Windows Form Width and Hight
         private readonly int appFormWidth = 1900;  
         private readonly static int appFormHeight = 1000; 
-        //private readonly int appFormWidth = 1700; \\ Testing Setting
-        //private readonly static int appFormHeight =1000; \\ Testing Setting
 
         // mainAppPanel Width and Hight
         private readonly static int mainAppPanelWidth = 1800;
@@ -104,17 +105,21 @@ namespace Scanner
         private readonly static int Row1 = 0;
         private readonly static int Row2 = Row1 + RowDistanceControl;
         private readonly static int Row3 = Row2 + RowDistanceText;
-        private readonly static int Row4 = Row3 + RowDistanceText;
+        private readonly static int Row4 = Row3 + RowDistanceText + 20;
         private readonly static int Row5 = Row4 + RowDistanceControl;
-        private readonly static int Row6 = Row5 + RowDistanceControl;
+        private readonly static int Row6 = Row5 + RowDistanceControl + 30;
         private readonly static int Row7 = Row6 + RowDistanceControl;
 
         private readonly static int GroupWidth = 650;
         private readonly static int GroupHeight = 75;
+        private readonly static int ColorGroupHeight = 105;
         private readonly static int CenterOfGroupRow = 30;
+        private readonly static int BelowCenterOfGroupRow = 60;
+
 
         private readonly static int thumbnailWidth = 220;
         private readonly static int thumbnailHeight = 160;
+        private Label scanFilesTitle;
 
         private readonly Color selectedButtonBackColor = Color.LightGray;
         private readonly Color selectedButtonForeColor = Color.White;
@@ -125,15 +130,18 @@ namespace Scanner
 
         private readonly string scannningInstructionsText = "Scanning Instructions";
         private readonly string scannedDocuemtnPreviewText = "Scanned Document Preview";
+        private readonly string scanFilesTitleText = "BMP Scanned Files";
+        
         private enum ScanMode
         {
-            BlackAndWhite,
+            BlackAndWhiteText,
+            BlackAndWhiteIMG,
             Grayscale,
             Color
         }
 
 
-        private ScanMode selectedScanMode = ScanMode.BlackAndWhite;
+        private ScanMode selectedScanMode = ScanMode.BlackAndWhiteText;
 
 
 
@@ -147,8 +155,8 @@ namespace Scanner
                 "City of McKinney Public Library Scanner";
 
             // Configuration.
-            this.WindowState = FormWindowState.Normal; // Testing
-            //this.WindowState = FormWindowState.Maximized; // Production 
+            //this.WindowState = FormWindowState.Normal; // Testing
+            this.WindowState = FormWindowState.Maximized; // Production 
             this.StartPosition = FormStartPosition.CenterScreen;
             this.FormBorderStyle = FormBorderStyle.None;
             this.Size = new Size(appFormWidth, appFormHeight);
@@ -236,6 +244,18 @@ namespace Scanner
                 BackColor = Color.White
             };
 
+            scanFilesTitle = new Label
+            {
+                Text = scanFilesTitleText,
+                Dock = DockStyle.Top,
+                Height = 35,
+                Font = Globals.boldUiFont,
+                TextAlign = ContentAlignment.MiddleLeft,
+                ForeColor = Color.Green,
+                Padding = new Padding(5)
+            };
+
+
             pictureBox1 = new PictureBox
             {
                 Dock = DockStyle.Fill,
@@ -243,6 +263,7 @@ namespace Scanner
                 BackColor = Color.White
             };
 
+            scanFilesPanel.Controls.Add(scanFilesTitle);
             scanFilesPanel.Controls.Add(pictureBox1);
             mainAppPanel.Controls.Add(scanFilesPanel);
 
@@ -299,7 +320,6 @@ namespace Scanner
                 Height = 25,
                 TextAlign = ContentAlignment.MiddleCenter,
                 ForeColor = Color.Green,
-                //ForeColor = ColorTranslator.FromHtml("#007282"),
                 Font = Globals.boldUiFont
             };
 
@@ -337,11 +357,11 @@ namespace Scanner
 
                         } else
                         {
-                            // 2. Make the text font larger for the items you KEEP visible
+                            // Make the text font larger for the items you KEEP visible
                             // This keeps the existing font family/style but bumps the size to 12pt
                             item.Font = Globals.toolbarFont;
 
-                            // 3. Optional: Force the item to scale its image up to match the new ImageScalingSize
+                            // Force the item to scale its image up to match the new ImageScalingSize
                             item.ImageScaling = ToolStripItemImageScaling.SizeToFit;
                         }
                     }
@@ -475,31 +495,46 @@ namespace Scanner
                 {
                     Text = "Select Scan Mode",
                     Width = GroupWidth,
-                    Height = GroupHeight,
+                    Height = ColorGroupHeight,
                     Location = new Point(Column1, Row5),
                     Font = Globals.boldUiFont,
                     ForeColor = Color.Green
                 };
 
-            blackWhiteRadioButton =
+            blackWhiteTextRadioButton =
                 new RadioButton
                 {
-                    Text = "Black and White",
+                    Text = "Black and White Text",
                     AutoSize = true,
                     Location = new Point(Column1, CenterOfGroupRow),
                     ForeColor = Color.Black
                 };
-            blackWhiteRadioButton.Click += (s, e) =>
+            blackWhiteTextRadioButton.Click += (s, e) =>
             {
-                Globals.scanSelectedScanMode = "BlackAndWhite";
+                Globals.scanSelectedScanMode = "BlackAndWhiteText";
             };
+
+            blackWhiteIMGRadioButton =
+                new RadioButton
+                {
+                    Text = "Black and White Images",
+                    AutoSize = true,
+                    Location = new Point(Column1, BelowCenterOfGroupRow),
+                    ForeColor = Color.Black
+                };
+
+            blackWhiteIMGRadioButton.Click += (s, e) =>
+            {
+                Globals.scanSelectedScanMode = "BlackAndWhiteIMG";
+            };
+
 
             grayscaleRadioButton =
                 new RadioButton
                 {
                     Text = "Grayscale",
                     AutoSize = true,
-                    Location = new Point(Column2, CenterOfGroupRow),
+                    Location = new Point(Column2 + 50, CenterOfGroupRow),
                     ForeColor = Color.Black
                 };
             grayscaleRadioButton.Click += (s, e) =>
@@ -512,7 +547,7 @@ namespace Scanner
                 {
                     Text = "Color",
                     AutoSize = true,
-                    Location = new Point(Column3, CenterOfGroupRow),
+                    Location = new Point(Column2 + 50, BelowCenterOfGroupRow),
                     ForeColor = Color.Black
                 };
             colorRadioButton.Click += (s, e) =>
@@ -523,7 +558,8 @@ namespace Scanner
 
             colorModeGroup.Controls.Add(colorRadioButton);
             colorModeGroup.Controls.Add(grayscaleRadioButton);
-            colorModeGroup.Controls.Add(blackWhiteRadioButton);
+            colorModeGroup.Controls.Add(blackWhiteTextRadioButton);
+            colorModeGroup.Controls.Add(blackWhiteIMGRadioButton);
 
             // DPI
             dpiGroup = new GroupBox
@@ -543,6 +579,11 @@ namespace Scanner
                 Location = new Point(Column1, CenterOfGroupRow),
                 ForeColor = Color.Black
             };
+            standardDpiRadioButton.Click += (s, e) =>
+            {
+                Globals.selectedDPI = GetSelectedDPI();
+            };
+
 
             highDpiRadioButton = new RadioButton
             {
@@ -550,6 +591,10 @@ namespace Scanner
                 AutoSize = true,
                 Location = new Point(Column2, CenterOfGroupRow),
                 ForeColor = Color.Black
+            };
+            highDpiRadioButton.Click += (s, e) =>
+            {
+                Globals.selectedDPI = GetSelectedDPI();
             };
 
             dpiGroup.Controls.Add(highDpiRadioButton);
@@ -689,7 +734,8 @@ namespace Scanner
             emailCheckBox.Checked = true;
             usbCheckBox.Checked = false;
 
-            blackWhiteRadioButton.Checked = true; 
+            blackWhiteTextRadioButton.Checked = true;
+            blackWhiteIMGRadioButton.Checked = false;
             grayscaleRadioButton.Checked = false; 
             colorRadioButton.Checked = false;
 
@@ -701,7 +747,9 @@ namespace Scanner
             bmpCheckBox.Checked = false;
             bmpCheckBox.Enabled = false;
 
-            
+            Globals.scanSelectedScanMode = "BlackAndWhiteText";
+
+
         }
 
         // =========================================================
@@ -725,7 +773,8 @@ namespace Scanner
                 usbCheckBox.ForeColor = enabledColor;
                 colorRadioButton.ForeColor = enabledColor;
                 grayscaleRadioButton.ForeColor = enabledColor;
-                blackWhiteRadioButton.ForeColor = enabledColor;
+                blackWhiteTextRadioButton.ForeColor = enabledColor;
+                blackWhiteIMGRadioButton.ForeColor = enabledColor;
                 standardDpiRadioButton.ForeColor = enabledColor;
                 highDpiRadioButton.ForeColor = enabledColor;
                 pdfCheckBox.ForeColor = enabledColor;
@@ -737,7 +786,8 @@ namespace Scanner
                 usbCheckBox.ForeColor = disableldColor;
                 colorRadioButton.ForeColor = disableldColor;
                 grayscaleRadioButton.ForeColor = disableldColor;
-                blackWhiteRadioButton.ForeColor = disableldColor;
+                blackWhiteTextRadioButton.ForeColor = disableldColor;
+                blackWhiteIMGRadioButton.ForeColor = disableldColor;
                 standardDpiRadioButton.ForeColor = disableldColor;
                 highDpiRadioButton.ForeColor = disableldColor;
                 pdfCheckBox.ForeColor = disableldColor;
@@ -836,6 +886,7 @@ namespace Scanner
             Console.WriteLine("******************  Entered Thumbnail_DoubleClick  **************");
 
             PictureBox thumbnail = sender as PictureBox;
+            DialogResult result;
 
             if (thumbnail == null || thumbnail.Tag == null)
                 return;
@@ -844,9 +895,9 @@ namespace Scanner
 
             using (ImagePreviewForm preview = new ImagePreviewForm(filePath))
             {
-                //Console.WriteLine("filePath.Length" + filePath.Length);
                 
-                DialogResult result = preview.ShowDialog(this);
+                
+                result = preview.ShowDialog(this);
 
                 Console.WriteLine("******* ImagePreviewForm ShowDialog result: " + result);
 
@@ -863,7 +914,6 @@ namespace Scanner
                         {
                             pageLabel.Text = $"Pages scanned: {Globals.pageNumber}" + "   [ " + Globals.GetFriendlyImageSize() + " ]";
                         }
-                        //Console.WriteLine("******* Thumbnail_DoubleClick  Updated Status Counters\nfilepath " + filePath);
                     }
 
                     // User chose Delete
@@ -876,13 +926,18 @@ namespace Scanner
 
                     if (IsFileSizeOverLimit())
                     {
-                        MessageBox.Show(
-                            "The scanned files exceed the maximum allowed size of 40 MB.\n\n" +
-                            "Please delete some files and try again.",
+
+                        using (ConfirmForm confirmForm = 
+                            new ConfirmForm("Please delete some files and try again.",
                             "File Size Limit Exceeded",
-                            MessageBoxButtons.OK,
-                            MessageBoxIcon.Warning
-                        );
+                            "The scanned files exceed the maximum allowed size.",
+                            "",
+                            DialogResult.OK,
+                            MessageBoxIcon.Information))
+                        {
+                            result = confirmForm.ShowDialog(this);
+
+                        }
 
                         return;
                     }
@@ -925,9 +980,12 @@ namespace Scanner
                 }
 
                 control.Dispose();
+                
             }
 
             scanFilesPanel.Controls.Clear();
+            
+
         }
 
 
@@ -937,6 +995,8 @@ namespace Scanner
 
         private void Thumbnail_MouseDown(object sender, MouseEventArgs e)
         {
+            Console.WriteLine("********** ENTERED Thumbnail_MouseDown **********");
+
             if (e.Button != MouseButtons.Right)
                 return;
 
@@ -946,14 +1006,23 @@ namespace Scanner
             if (string.IsNullOrEmpty(filePath))
                 return;
 
-            DialogResult result = MessageBox.Show(
-                $"Delete this scanned file?\n\n{Path.GetFileName(filePath)}",
-                "Delete Scan",
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Warning);
 
-            if (result != DialogResult.Yes)
-                return;
+
+            using (ConfirmForm confirmForm = 
+                new ConfirmForm($"{Path.GetFileName(filePath)}",
+                "Delete Document",
+                "The scanned document will be permanently deleted.",
+                "Are you sure you want to delete this document?",
+                DialogResult.Yes,
+                MessageBoxIcon.Warning))
+            {
+                DialogResult result = confirmForm.ShowDialog(this);
+
+                if (result != DialogResult.Yes)
+                {
+                    return;
+                }
+            }
 
             // Remove UI first
             scanFilesPanel.Controls.Remove(thumbnail);
@@ -985,13 +1054,19 @@ namespace Scanner
 
                 if (IsFileSizeOverLimit())
                 {
-                    MessageBox.Show(
-                        "The scanned files exceed the maximum allowed size of 40 MB.\n\n" +
-                        "Please delete some files and try again.",
+
+                    using (ConfirmForm confirmForm = 
+                        new ConfirmForm("Please delete some files and try again.",
                         "File Size Limit Exceeded",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Warning
-                    );
+                        "The scanned files exceed the maximum allowed size.",
+                        "",
+                        DialogResult.OK,
+                        MessageBoxIcon.Information))
+                    {
+                        DialogResult result = confirmForm.ShowDialog(this);
+
+                    }
+
 
                     return;
                 }
@@ -1006,6 +1081,7 @@ namespace Scanner
                     MessageBoxIcon.Error);
             }
 
+            Console.WriteLine("********** EXITED Thumbnail_MouseDown **********");
         }
 
 
@@ -1103,7 +1179,10 @@ namespace Scanner
 
                 okButton.Click += (s, args) =>
                 {
-                    if (passwordBox.Text == "1234")
+                    // ConfigExitCode is set in the App.config file.
+                    // This can be updated and application restarted for change to take effect
+                    string ConfigExitCode = ConfigurationManager.AppSettings["ConfigExitCode"];
+                    if (passwordBox.Text == ConfigExitCode)
                         Application.Exit();
                     else
                         MessageBox.Show("Incorrect password.");
@@ -1128,18 +1207,23 @@ namespace Scanner
         {
             try
             {
-                DialogResult result = MessageBox.Show(
-                   "Are you sure you want to discard this document?\r\n\r\n" +
-                   "The scanned document will be permanently deleted. " +
-                   "You will need to scan the pages again if you wish to keep them.",
-                   "Discard Document",
-                   MessageBoxButtons.OKCancel,
-                   MessageBoxIcon.Warning);
 
-                if (result != DialogResult.OK)
+                using (ConfirmForm confirmForm = 
+                    new ConfirmForm("You will need to scan the pages again \n if you wish to keep them.",
+                    "Discard Document",
+                    "The scanned document will be permanently deleted.",
+                    "Are you sure you want to discard this document?",
+                    DialogResult.Yes,
+                    MessageBoxIcon.Warning))
                 {
-                    return;
+                    DialogResult result = confirmForm.ShowDialog(this);
+
+                    if (result == DialogResult.No)
+                    {
+                        return;
+                    }
                 }
+
 
                 EnableScanningOptions(true);
                 SetDefaultScannerOptions();
@@ -1169,17 +1253,9 @@ namespace Scanner
                 pageLabel.Text =
                     "Pages scanned: 0";
 
-                pdfPreviewLabel.Text = scannningInstructionsText;
-
-                
+                pdfPreviewLabel.Text = scannningInstructionsText;                
                 SetButtonEnabled(startScanButton,true);
 
-                MessageBox.Show(
-                    "The document was discarded.\r\n\r\n" +
-                    "Please scan the document again.",
-                    "Scan Again",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Information);
             }
             catch (Exception ex)
             {
@@ -1443,9 +1519,29 @@ namespace Scanner
         private Double GetSelectedDPI()
         {
             if (standardDpiRadioButton.Checked)
-                return Globals.StandardScanResolutionDpi;
+            {   
+                if (blackWhiteTextRadioButton.Checked)
+                {
+                    return Globals.StandardTextScanResolutionDpi;
+                } else
+                {
+                    return Globals.StandardScanResolutionDpi;
+                }
+                    
+            }
+                
             else if (highDpiRadioButton.Checked)
-                return Globals.HighScanResolutionDpi;
+            {
+                if (blackWhiteTextRadioButton.Checked)
+                {
+                    return Globals.HighTextScanResolutionDpi;
+                }
+                else
+                {
+                    return Globals.HighScanResolutionDpi;
+                }
+                
+            }
             else
                 return Globals.StandardScanResolutionDpi;
         }
@@ -1457,8 +1553,11 @@ namespace Scanner
 
         private ScanMode GetSelectedScanMode()
         {
-            if (blackWhiteRadioButton.Checked)
-                return ScanMode.BlackAndWhite;
+            if (blackWhiteTextRadioButton.Checked)
+                return ScanMode.BlackAndWhiteText;
+
+            else if (blackWhiteIMGRadioButton.Checked)
+                return ScanMode.BlackAndWhiteIMG;
 
             else if (grayscaleRadioButton.Checked)
                 return ScanMode.Grayscale;
@@ -1466,7 +1565,7 @@ namespace Scanner
             else if (colorRadioButton.Checked)
                 return ScanMode.Color;
             else
-                return ScanMode.BlackAndWhite;
+                return ScanMode.BlackAndWhiteText;
         }
 
 
@@ -1477,7 +1576,10 @@ namespace Scanner
         {
             switch (selectedScanMode)
             {
-                case ScanMode.BlackAndWhite:
+                case ScanMode.BlackAndWhiteText:
+                    return NTwain.Data.PixelType.BlackWhite;
+
+                case ScanMode.BlackAndWhiteIMG:
                     return NTwain.Data.PixelType.BlackWhite;
 
                 case ScanMode.Grayscale:
@@ -1515,9 +1617,6 @@ namespace Scanner
 
             NTwain.Data.PixelType pixelType = GetPixelType();
 
-            Console.WriteLine(
-                "Scan Mode: " +
-                selectedScanMode);
 
             Console.WriteLine(
                 "Pixel Type: " +
@@ -1534,6 +1633,42 @@ namespace Scanner
                 pixelType);
 
         }
+        
+        
+        public static void LogMemoryUsage()
+        {
+            using (Process process = Process.GetCurrentProcess())
+            {
+                process.Refresh();
+
+                double workingSetMB =
+                    process.WorkingSet64 / (1024.0 * 1024.0);
+
+                double privateMemoryMB =
+                    process.PrivateMemorySize64 / (1024.0 * 1024.0);
+
+                double managedHeapMB =
+                    GC.GetTotalMemory(false) / (1024.0 * 1024.0);
+
+                string message =
+                    $"***********************************************\n" +
+                    $"****** Memory Usage \n" +
+                    $"****** Working Set: {workingSetMB:F2} MB  \n " +
+                    $"****** Private Memory: {privateMemoryMB:F2} MB  \n " +
+                    $"****** Managed Heap: {managedHeapMB:F2} MB  \n" +
+                    $"***********************************************\n";
+
+                // Replace with your application's logger.
+                Logger.Log(message);
+                Console.WriteLine(message);
+
+                Logger.Error(message);
+                Logger.Warning(message);
+                //Logger.Exception(ex, "ERROR DURING FORM CLOSING CLEANUP: " + ex);
+
+            }
+        }
+
 
         // =========================================================
         // START SCAN
@@ -1546,6 +1681,10 @@ namespace Scanner
             
             Console.WriteLine("ENTERING StartScanButton_Click");
 
+            // Log memory usage every time a user starts scanning.
+            // This will help monitor memory usage throughout the day.
+            // If prior scanner usage has memory leaks, we should be able to see it in the logs.
+            LogMemoryUsage();
 
             // disable Scanning Options for this duration of the scanning batch
             // until user discard or Accepts PDF
@@ -1553,6 +1692,7 @@ namespace Scanner
             // Cleanup Any prior Temporary Files
             Globals.CleanupTemporaryFiles();
 
+            scanFilesPanel.Controls.Add(scanFilesTitle);
 
             // Require at least one delivery method
             if (!emailCheckBox.Checked && !usbCheckBox.Checked)
@@ -1564,7 +1704,7 @@ namespace Scanner
                     "• USB",
                     "Delivery Method Required",
                     MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
+                    MessageBoxIcon.Information);
 
                 return;
             }
@@ -1666,19 +1806,24 @@ namespace Scanner
 
        private bool IsFileSizeOverLimit()
         {
+            Console.WriteLine("********** ENTERED IsFileSizeOverLimit **********");
             if (Globals.totalEstImageBytes >= Globals.PDFMaxSize)
             {
-                Console.WriteLine($"EnforceFileSizeLimits {Globals.totalEstImageBytes} >= {Globals.PDFMaxSize}");
+                Console.WriteLine($"EnforceFileSizeLimits is true {Globals.totalEstImageBytes} >= {Globals.PDFMaxSize}");
                 SetButtonEnabled(scanMorePagesButton, false);
                 SetButtonEnabled(doneScanningButton, false);
+                Console.WriteLine("********** exited IsFileSizeOverLimit **********");
                 return true;
             } else
             {
-                Console.WriteLine($"EnforceFileSizeLimits {Globals.totalEstImageBytes} < {Globals.PDFMaxSize}");
+                Console.WriteLine($"EnforceFileSizeLimits is false {Globals.totalEstImageBytes} < {Globals.PDFMaxSize}");
                 SetButtonEnabled(scanMorePagesButton, true);
                 SetButtonEnabled(doneScanningButton, true);
+                Console.WriteLine("********** exited IsFileSizeOverLimit **********");
                 return false;
             }
+
+            
 
         }
         
@@ -1732,15 +1877,20 @@ namespace Scanner
             object sender,
             EventArgs e)
         {
+            Console.WriteLine("********** ENTERED ScanMorePagesButton_Click **********");
             if (IsFileSizeOverLimit())
             {
-                MessageBox.Show(
-                    "The scanned files exceed the maximum allowed size of 40 MB.\n\n" +
-                    "Please delete some files and try again.",
+                using (ConfirmForm confirmForm =
+                    new ConfirmForm("Please delete some files and try again.",
                     "File Size Limit Exceeded",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning
-                );
+                    "The scanned files exceed the maximum allowed size.",
+                    "",
+                    DialogResult.OK,
+                    MessageBoxIcon.Information))
+                {
+                    DialogResult result = confirmForm.ShowDialog(this);
+
+                }
 
                 return;
             }
@@ -1773,6 +1923,9 @@ namespace Scanner
                 SetButtonEnabled(scanMorePagesButton,true);
                 SetButtonEnabled(doneScanningButton,true);
             }
+
+            Console.WriteLine("********** EXITED ScanMorePagesButton_Click **********");
+
         }
 
 
@@ -1783,16 +1936,22 @@ namespace Scanner
             object sender,
             EventArgs e)
         {
+            Console.WriteLine("********** ENTERED DoneScanningButton_Click **********");
+
 
             if (IsFileSizeOverLimit())
             {
-                MessageBox.Show(
-                    "The scanned files exceed the maximum allowed size of 40 MB.\n\n" +
-                    "Please delete some files and try again.",
+                using (ConfirmForm confirmForm =
+                    new ConfirmForm("Please delete some files and try again.",
                     "File Size Limit Exceeded",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning
-                );
+                    "The scanned files exceed the maximum allowed size.",
+                    "",
+                    DialogResult.OK,
+                    MessageBoxIcon.Information))
+                {
+                    DialogResult result = confirmForm.ShowDialog(this);
+
+                }
 
                 return;
             }
@@ -1807,6 +1966,8 @@ namespace Scanner
             await FinishScanning();
 
             pdfPreviewLabel.Text = scannedDocuemtnPreviewText;
+
+            Console.WriteLine("********** EXITED DoneScanningButton_Click **********");
         }
 
         // =========================================================
@@ -1998,15 +2159,24 @@ namespace Scanner
 
                     } catch
                     {
-                        MessageBox.Show(
-                            "The email service is temporarily unavailable.\n\n" +
-                            "Please try again later or ask a library staff member for assistance.",
+                        Logger.Error("DeliverDocument -  The email service is temporarily unavailable.");
+                        Console.WriteLine("DeliverDocument -  The email service is temporarily unavailable.");
+
+                        using (ConfirmForm confirmForm =
+                            new ConfirmForm("The email service is temporarily unavailable.",
                             "Email Service Unavailable",
-                            MessageBoxButtons.OK,
-                            MessageBoxIcon.Warning);
+                            "Please try again later.",
+                            "",
+                            DialogResult.OK,
+                            MessageBoxIcon.Information))
+                        {
+                            DialogResult result = confirmForm.ShowDialog(this);
+                        }
+
+
 
                     }
-                    
+
                 }
 
                 // Runs after the EmailForm closes.

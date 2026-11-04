@@ -173,6 +173,9 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ConfirmForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Logger.cs" />
     <Compile Include="SesEmailSender.cs" />
     <Compile Include="EmailForm.cs">

@@ -22,9 +22,12 @@ namespace Scanner
         public const string exitAppImageFile = @"C:\BookScanner7145\McKinneyPublicLibrary.png";
         public const int requiredSecurityClicks = 5;
         public const int requiredSecuritySeconds = 1;
-        public const int PDFMaxSize = 41943040;  // 40 MB
-        public const double StandardScanResolutionDpi = 100.0;
+        public const int PDFMaxSize = 9437184;  // 9 MB
+        public const double StandardScanResolutionDpi = 150.0;
         public const double HighScanResolutionDpi = 200.0;
+        public const double StandardTextScanResolutionDpi = 200.0;
+        public const double HighTextScanResolutionDpi = 300.0;
+
 
         // Global static properties which value DO change
         public static string pdfFilePath;
@@ -34,7 +37,7 @@ namespace Scanner
         public static string usbDrive = null;
         public static int pageNumber;
         public static string createdPdf = null;
-        public static string scanSelectedScanMode = "BlackAndWhite";
+        public static string scanSelectedScanMode = "BlackAndWhiteText";
         public static double totalImageBytes;
         public static double currentImageSizeKB;
         public static double totalEstImageBytes;
@@ -42,7 +45,7 @@ namespace Scanner
         public static double totalImageMB;
 
         
-        public static double selectedDPI = StandardScanResolutionDpi;
+        public static double selectedDPI = StandardTextScanResolutionDpi;
 
         public static Font boldUiFont;
         public static Font normalUiFont;
@@ -73,11 +76,16 @@ namespace Scanner
                 catch (IOException)
                 {
                     
-                    MessageBox.Show(
-                        "There is not enough space on the USB drive.",
+                    using (ConfirmForm confirmForm = 
+                        new ConfirmForm("There is not enough space on the USB drive.",
                         "Not Enough Disk Space",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Warning);
+                        "",
+                        "",
+                        DialogResult.OK,
+                        MessageBoxIcon.Information))
+                    {
+                        DialogResult result = confirmForm.ShowDialog();
+                    }
 
                     return false;
                 }
@@ -101,27 +109,19 @@ namespace Scanner
                 totalImageMB = 0;
                 return "0 KB";
             }
-            Console.WriteLine($"totalImageBytes={totalImageBytes} totalEstImageBytes={totalEstImageBytes} totalImageMegaBytes {totalImageMB}");
 
             // 2. Perform the mathematical divisions
             double kb = totalEstImageBytes / 1024.0;
             double mb = kb / 1024.0;
 
-            Console.WriteLine("totalImageBytes: " + totalEstImageBytes);
-            Console.WriteLine("KB: " + kb);
-            Console.WriteLine("MB: " + mb);
-
             // 3. Formulate and return the formatted string match
             if (mb >= 1.0)
             {
-                //totalImageMegaBytes = mb;
-                //Console.WriteLine("if MB totalImageMegaBytes: " + totalImageMegaBytes);
                 // Formats to 2 decimal places (e.g., "3.15 MB")
                 return $"{mb:N2} MB";
             }
             else
             {
-                Console.WriteLine("else kb: " + kb);
                 // Formats to 1 decimal place (e.g., "120.5 KB")
                 return $"{kb:N1} KB";
             }
@@ -176,7 +176,7 @@ namespace Scanner
                             "There is not enough space on the USB drive.",
                             "Not Enough Disk Space",
                             MessageBoxButtons.OK,
-                            MessageBoxIcon.Warning);
+                            MessageBoxIcon.Information);
 
                         return false;
                     }
@@ -225,7 +225,7 @@ namespace Scanner
                         "No - continue without a USB drive",
                         "USB Drive Required",
                         MessageBoxButtons.YesNo,
-                        MessageBoxIcon.Warning);
+                        MessageBoxIcon.Information);
 
                     if (result == DialogResult.Yes)
                     {
@@ -249,7 +249,7 @@ namespace Scanner
                         "you want to use for the BookScanner.",
                         "Multiple USB Drives",
                         MessageBoxButtons.OK,
-                        MessageBoxIcon.Warning);
+                        MessageBoxIcon.Information);
 
                     // Check again after the user disconnects one
                     continue;

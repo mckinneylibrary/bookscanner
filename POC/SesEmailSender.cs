@@ -11,7 +11,6 @@ using Amazon.SimpleEmail.Model;
 using MimeKit;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -22,11 +21,11 @@ namespace Scanner
     public static class SesEmailSender
     {
         public static async Task<string> SendScannedDocumentAsync(
-    string fromAddress,
-    string recipientAddress,
-    string subject,
-    string messageBody,
-    string attachmentPath)
+            string fromAddress,
+            string recipientAddress,
+            string subject,
+            string messageBody,
+            string attachmentPath)
         {
             if (!File.Exists(attachmentPath))
             {
@@ -101,20 +100,27 @@ namespace Scanner
                             Console.WriteLine(ex);
 
                             // Check if the underlying issue is the verification failure
-                            string errorMessage = "The email service is temporarily unavailable.\n\n" +
-                                                  "Please try again later or ask a library staff member for assistance.";
+                            string errorMessage = "The email service is NOT unavailable.";
 
-                            if (ex.Message.Contains("not verified") || ex.GetType().Name == "MessageRejectedException")
+                            if (ex.Message.Contains("not verified"))
                             {
-                                errorMessage = "The provided email address is unverified in this system.\n\n" +
-                                               "Please use a verified address or contact an administrator.";
+                                errorMessage = "Please use a verified address.";
+                            } else if (ex.GetType().Name == "MessageRejectedException")
+                            {
+                                errorMessage = "MessageRejectedException \nPlease contact an administrator.";
                             }
 
-                            MessageBox.Show(
-                                errorMessage,
-                                "Email Error",
-                                MessageBoxButtons.OK,
-                                MessageBoxIcon.Warning);
+
+                            using (ConfirmForm confirmForm =
+                                    new ConfirmForm(errorMessage,
+                                    "Email Error",
+                                    "Email service error.",
+                                    "",
+                                    DialogResult.OK,
+                                    MessageBoxIcon.Error))
+                                {
+                                    DialogResult result = confirmForm.ShowDialog();
+                                }
                         }
                         catch (Exception ex)
                         {
@@ -124,10 +130,10 @@ namespace Scanner
 
                             MessageBox.Show(
                                 "Your email could not be sent.\n\n" +
-                                "Please try again later or ask a library staff member for assistance.",
+                                "Please try again later.",
                                 "Email Error",
                                 MessageBoxButtons.OK,
-                                MessageBoxIcon.Warning);
+                                MessageBoxIcon.Error);
                             Scanner.Logger.Exception(ex, "ERROR SENDING EMAIL");
                             
                         }

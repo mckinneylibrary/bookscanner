@@ -79,11 +79,11 @@ namespace Scanner
         {
             try
             {
-                // TODO - use 30 days, currently testing with 5 days
-                //DateTime cutoffDate = DateTime.Now.AddDays(-30);
-                int cutoffDays = int.Parse(ConfigurationManager.AppSettings["CutoffDays"]);
-                DateTime cutoffDate = DateTime.Now.AddDays(-cutoffDays);
-                Console.WriteLine($"TODO DeleteOldLogFiles cutoffDate {cutoffDate}");
+                // LogCutoffDays is set in the App.config file.
+                // This can be updated and application restarted for change to take effect
+                int LogCutoffDays = int.Parse(ConfigurationManager.AppSettings["LogCutoffDays"]);
+                DateTime cutoffDate = DateTime.Now.AddDays(-LogCutoffDays);
+                Console.WriteLine($"DeleteOldLogFiles cutoffDate {cutoffDate}");
 
                 foreach (string file in Directory.GetFiles(
                     logDirectory, "application_*.log"))
@@ -210,31 +210,7 @@ namespace Scanner
                 }
             }
         }
-        //private static void Write(string level, string message)
-        //{
-        //    string entry =
-        //        DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") +
-        //        " [" + level + "] " + message;
-
-        //    lock (_lock)
-        //    {
-        //        try
-        //        {
-        //            if (!_initialized || string.IsNullOrEmpty(_logFilePath))
-        //                return;
-
-        //            File.AppendAllText(
-        //                _logFilePath,
-        //                entry + Environment.NewLine,
-        //                Encoding.UTF8);
-        //        }
-        //        catch
-        //        {
-        //            // Avoid recursive logging if the log file cannot be written.
-        //        }
-        //    }
-        //}
-
+ 
         private sealed class LogTextWriter : TextWriter
         {
             private readonly TextWriter _original;

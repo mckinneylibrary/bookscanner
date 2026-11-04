@@ -12,9 +12,6 @@ using PdfSharp.Pdf;
 using System;
 using System.Drawing;
 using System.IO;
-using System.Windows.Forms;
-using System.Windows.Media.Media3D;
-//using System.Windows.Controls;
 
 
 
@@ -84,7 +81,7 @@ namespace Scanner
 
         public void UpdateStatusCounters(String filePath)
         {
-            Console.WriteLine("*********************   Entered UpdateStatusCounters  DELETING FILE    **************************");
+            Console.WriteLine("*********************   ENTERED UpdateStatusCounters  DELETING FILE    **************************");
 
             Globals.pageNumber--; // Decrements the internal counter
 
@@ -129,6 +126,9 @@ namespace Scanner
             {
                 Console.WriteLine($"Failed to parse image headers safely: {ex.Message}");
             }
+
+            Console.WriteLine("*********************   EXITED UpdateStatusCounters  DELETING FILE    **************************");
+
         }
 
 
@@ -531,7 +531,7 @@ namespace Scanner
             object sender,
             DataTransferredEventArgs e)
         {
-            Console.WriteLine("****************  Entered Twain_DataTransferred *************************");
+            Console.WriteLine("****************  ENTERED Twain_DataTransferred *************************");
             try
             {
                 Globals.pageNumber++;
@@ -604,8 +604,6 @@ namespace Scanner
                             // Extract Bits Per Pixel (Offset 28)
                             ushort bitsPerPixel = BitConverter.ToUInt16(headerBuffer, 28);
                             Console.WriteLine("Twain_DataTransferred   bitsPerPixel:" + bitsPerPixel);
-
-                            Console.WriteLine($"Scanned Page Dimensions: {width} x {height} pixels " + "bmpFileSize:" + bmpFileSize);
                         }
 
                         UpdateEstimatePDFSize( bmpFileSize,  width,  height);
@@ -624,8 +622,8 @@ namespace Scanner
                 PageScanned?.Invoke(
                     this,
                     imagePath);
-
-                Console.WriteLine("Estimated file size: " + Globals.GetFriendlyImageSize());
+                
+                //Console.WriteLine("Estimated file size: " + Globals.GetFriendlyImageSize());
 
 
 
@@ -637,6 +635,9 @@ namespace Scanner
                     $"{Globals.pageNumber}\r\n" +
                     ex);
             }
+
+            Console.WriteLine("****************  EXITED Twain_DataTransferred *************************");
+
         }
 
         // =========================================================
@@ -644,194 +645,162 @@ namespace Scanner
         // =========================================================
         private void UpdateEstimatePDFSize(long bmpFileSize, int width, int height)
         {
-            Console.WriteLine("*********************   Entered UpdateEstimatePDFSize     **************************");
+            Console.WriteLine("*********************   ENTERED UpdateEstimatePDFSize     **************************");
 
             string colorMode = Globals.scanSelectedScanMode;
             double factor = 1; // Default to color factor
-            Console.WriteLine("****  Color Mode = " + colorMode);
-            //// Page Letter size factor estimate StandardDPI = 300 HighDPI = 600
-            //if (colorMode == "BlackAndWhite")
-            //{
-            //    if ((height < 2600 && width < 3300) || (height < 3300 && width < 2600))
-            //    {
-            //        factor = 0.08;
-            //    }
-            //    else
-            //    {
-            //        // Page larger size factor estimate
-            //        factor = 0.12;
-            //    }
-            //    Console.WriteLine("Black and white factor " + factor);
-            //} else if (colorMode == "Grayscale")
-            //{
-            //    //if ((height < 2600 && width < 3300) || (height < 3300 && width < 2600))
-            //    //{
-            //    //    factor = 0.58;
-            //    //}
-            //    //else
-            //    //{
-            //    //    // Page larger size factor estimate
-            //    //    factor = 0.60;
-            //    //}
-            //    factor = 0.60;
-            //    Console.WriteLine("****   Grascale factor  *****" + factor);
-            //} else if (colorMode == "Color")
-            //{
-            //    if ((height < 2600 && width < 3300) || (height < 3300 && width < 2600))
-            //    {
-            //        factor = 0.715;
-            //    }
-            //    else
-            //    {
-            //        // Page larger size factor estimate
-            //        factor = 0.73;
-            //    }
-            //    //factor = 0.45;
-            //    Console.WriteLine("****  Color factor *****" + factor);
-            //}
-
+            
+            
+            // Set initial Height and With, but will be changed based on Resolution DPI Selected.
             int dpiWidth = width;
             int dpiHeight = height;
-            if (Globals.selectedDPI == Globals.StandardScanResolutionDpi) 
-            {
-                dpiWidth = 1100;
-                dpiHeight = 900;
-                if (colorMode == "BlackAndWhite") // Tested Good
-                {
 
-                    if ((height < dpiHeight && width < dpiWidth) || (height < dpiWidth && width < dpiHeight))
-                    {
-                        factor = 0.18;
-                    }
-                    else
-                    {
-                        // Page larger size factor estimate
-                        factor = 0.23;
-                    }
-                    Console.WriteLine("Black and white factor " + factor);
-                }
-                else if (colorMode == "Grayscale")
-                {
-                    if ((height < dpiHeight && width < dpiWidth) || (height < dpiWidth && width < dpiHeight))
-                    {
-                        factor = 0.57;
-                    }
-                    else
-                    {
-                        // Page larger size factor estimate
-                        factor = 0.71;
-                    }
-                    //factor = 0.60;
-                    Console.WriteLine("****   Grascale factor  *****" + factor);
-                }
-                else if (colorMode == "Color")
-                {
-                    if ((height < dpiHeight && width < dpiWidth) || (height < dpiWidth && width < dpiHeight))
-                    {
-                        factor = 0.715;
-                    }
-                    else
-                    {
-                        // Page larger size factor estimate
-                        factor = 0.85;
-                    }
-                    //factor = 0.45;
-                    Console.WriteLine("****  Color factor *****" + factor);
-                }
-        
-        } else
+            if (Globals.selectedDPI == Globals.StandardTextScanResolutionDpi)
             {
-                // High resolution TESTING in Progress
-                dpiWidth = 1700;
-                dpiHeight = 2200;
-                if (colorMode == "BlackAndWhite")   // Tested In progress
-                {
+                Console.WriteLine("STANDARD text resolution DPI");
 
+                dpiWidth = 1900;
+                dpiHeight = 2400;
+
+                if (colorMode == "BlackAndWhiteText") 
+                {
+                    // Letter Size
                     if ((height < dpiHeight && width < dpiWidth) || (height < dpiWidth && width < dpiHeight))
                     {
+                        factor = 0.08;
+                    }
+                    else
+                    {
+                        // Page larger size factor estimate
+                        factor = 0.15;
+                    }
+                    Console.WriteLine("Black and white text factor " + factor);
+                }
+            }
+            else if (Globals.selectedDPI == Globals.HighTextScanResolutionDpi)
+            {
+                Console.WriteLine("HIGH text resolution DPI");
+
+                dpiWidth = 2800;
+                dpiHeight = 3500;
+
+                if (colorMode == "BlackAndWhiteText")
+                {
+                    // Letter page size factor estimate
+                    if ((height < dpiHeight && width < dpiWidth) || (height < dpiWidth && width < dpiHeight))
+                    {
+                        factor = 0.06;
+                    }
+                    else
+                    {
+                        // Larger page size factor estimate
                         factor = 0.14;
                     }
+                    Console.WriteLine("Black and white Text factor " + factor);
+                }
+            }
+            else if (Globals.selectedDPI == Globals.StandardScanResolutionDpi)
+            {
+                Console.WriteLine("STANDARD resolution DPI");
+                // Low resolution DPI, Height and Width Settings
+                dpiWidth = 1400;
+                dpiHeight = 1800;
+
+                if (colorMode == "BlackAndWhiteIMG")  // Tested Good
+                {
+                    // Letter page size factor estimate
+                    if ((height < dpiHeight && width < dpiWidth) || (height < dpiWidth && width < dpiHeight))
+                    {
+                        factor = 0.21;
+                    }
                     else
                     {
-                        // Page larger size factor estimate
-                        factor = 0.18;
+                        // Larger page size factor estimate
+                        factor = 0.25;
                     }
                     Console.WriteLine("Black and white factor " + factor);
                 }
-                else if (colorMode == "Grayscale")
+                else if (colorMode == "Grayscale")  // Tested Good
                 {
+                    // Letter page size factor estimate
                     if ((height < dpiHeight && width < dpiWidth) || (height < dpiWidth && width < dpiHeight))
                     {
-                        factor = 0.57;
+                        factor = 0.43;
                     }
                     else
                     {
-                        // Page larger size factor estimate
-                        factor = 0.71;
+                        // Larger page size factor estimate
+                        factor = 0.63;
                     }
-                    //factor = 0.60;
                     Console.WriteLine("****   Grascale factor  *****" + factor);
                 }
-                else if (colorMode == "Color")
+                else if (colorMode == "Color")   // Tested Good - testing
                 {
+                    // Letter page size factor estimate
                     if ((height < dpiHeight && width < dpiWidth) || (height < dpiWidth && width < dpiHeight))
                     {
-                        factor = 0.715;
+                        factor = 0.65;
                     }
                     else
                     {
-                        // Page larger size factor estimate
-                        factor = 0.85;
+                        // Larger page size factor estimate
+                        factor = 0.74;
                     }
-                    //factor = 0.45;
+                    Console.WriteLine("****  Color factor *****" + factor);
+                }
+            }
+            else
+            {
+                Console.WriteLine("HIGH resolution DPI");
+            
+                dpiWidth = 1300;
+                dpiHeight = 1700;
+                
+                if (colorMode == "BlackAndWhiteIMG")  // Tested Good
+                {
+                    // Letter page size factor estimate
+                    if ((height < dpiHeight && width < dpiWidth) || (height < dpiWidth && width < dpiHeight))
+                    {
+                        factor = 0.21;
+                    }
+                    else
+                    {
+                        // Larger page size factor estimate
+                        factor = 0.25;
+                    }
+                    Console.WriteLine("Black and white factor " + factor);
+                }
+                else if (colorMode == "Grayscale")  // Tested Good
+                {
+                    // Letter page size factor estimate
+                    if ((height < dpiHeight && width < dpiWidth) || (height < dpiWidth && width < dpiHeight))
+                    {
+                        factor = 0.25;
+                    }
+                    else
+                    {
+                        // Larger page size factor estimate
+                        factor = 0.52;
+                    }
+                    Console.WriteLine("****   Grascale factor  *****" + factor);
+                }
+                else if (colorMode == "Color")   // Tested Good - testing
+                {
+                    // Letter page size factor estimate
+                    if ((height < dpiHeight && width < dpiWidth) || (height < dpiWidth && width < dpiHeight))
+                    {
+                        factor = 0.65;
+                    }
+                    else
+                    {
+                        // Larger page size factor estimate
+                        factor = 0.74;
+                    }
                     Console.WriteLine("****  Color factor *****" + factor);
                 }
 
             }
 
-            //// Page Letter size factor estimate StandardDPI = 100 HighDPI = 200
-            //if (colorMode == "BlackAndWhite")
-            //{
-            //    if ((height < dpiHeight && width < dpiWidth) || (height < dpiWidth && width < dpiHeight))
-            //    {
-            //        factor = 0.18;
-            //    }
-            //    else
-            //    {
-            //        // Page larger size factor estimate
-            //        factor = 0.23;
-            //    }
-            //    Console.WriteLine("Black and white factor " + factor);
-            //}
-            //else if (colorMode == "Grayscale")
-            //{
-            //    if ((height < 2600 && width < 3300) || (height < 3300 && width < 2600))
-            //    {
-            //        factor = 0.57;
-            //    }
-            //    else
-            //    {
-            //        // Page larger size factor estimate
-            //        factor = 0.71;
-            //    }
-            //    //factor = 0.60;
-            //    Console.WriteLine("****   Grascale factor  *****" + factor);
-            //}
-            //else if (colorMode == "Color")
-            //{
-            //    if ((height < 2600 && width < 3300) || (height < 3300 && width < 2600))
-            //    {
-            //        factor = 0.715;
-            //    }
-            //    else
-            //    {
-            //        // Page larger size factor estimate
-            //        factor = 0.85;
-            //    }
-            //    //factor = 0.45;
-            //    Console.WriteLine("****  Color factor *****" + factor);
-
-            //}
 
             Globals.totalImageBytes += bmpFileSize;
             Globals.currentImageSizeKB = bmpFileSize / 1024.0;
@@ -847,8 +816,8 @@ namespace Scanner
             Console.WriteLine($"totalEstImageBytes {Globals.totalEstImageBytes}");
             Console.WriteLine($"totalEstImageBytes {Globals.GetFriendlyImageSize()}");
             Console.WriteLine($"scanSelectedScanMode {Globals.scanSelectedScanMode}");
-            Console.WriteLine("*********************   END UpdateEstimatePDFSize     **************************");
-
+            
+            Console.WriteLine("*********************   EXITED UpdateEstimatePDFSize     **************************");
         }
         
         // =========================================================
@@ -933,6 +902,7 @@ namespace Scanner
         // =========================================================
         public string CreateFinalPdf()
         {
+            Console.WriteLine("**************   ENTERED CreateFinalPdf *************");
 
             if (Globals.pageNumber == 0)
             {
@@ -997,12 +967,15 @@ namespace Scanner
                         double dpiX = image.HorizontalResolution;
                         double dpiY = image.VerticalResolution;
 
+                        Console.WriteLine($"IMAGE dpiX HorizontalResolution = {dpiX}   dpiY VerticalResolution = {dpiY}");
+
                         // Use a reasonable fallback for invalid DPI values.
                         if (double.IsNaN(dpiX) ||
                             double.IsInfinity(dpiX) ||
                             dpiX < 50 || dpiX > 1200)
                         {
                             dpiX = 300.0;
+                            Console.WriteLine($"fallback dpiX HorizontalResolution = {dpiX}");
                         }
 
                         if (double.IsNaN(dpiY) ||
@@ -1010,15 +983,24 @@ namespace Scanner
                             dpiY < 50 || dpiY > 1200)
                         {
                             dpiY = 300.0;
+                            Console.WriteLine($"fallback dpiY VerticalResolution = {dpiY}");
                         }
 
                         double widthPoints = image.Width / dpiX * 72.0;
                         double heightPoints = image.Height / dpiY * 72.0;
+                        
+                        Console.WriteLine($"widthPoints  {widthPoints} =  image.Width {image.Width} / dpix {dpiX} * 72.0");
+                        Console.WriteLine($"heightPoints  {heightPoints} =  image.Width {image.Height} / dpiY {dpiY} * 72.0");
 
                         PdfPage page = document.AddPage();
 
                         page.Width = XUnit.FromPoint(widthPoints);
                         page.Height = XUnit.FromPoint(heightPoints);
+                        Console.WriteLine($"page.Width   {page.Width}");
+                        Console.WriteLine($"page.Height  {page.Height}");
+
+                        Console.WriteLine($"page.Width.Point   {page.Width.Point}");
+                        Console.WriteLine($"page.Height.Point  {page.Height.Point}");
 
                         using (
                             XGraphics graphics =
@@ -1033,6 +1015,8 @@ namespace Scanner
                                 0,
                                 page.Width.Point,
                                 page.Height.Point);
+                            Console.WriteLine($"xImage = {xImage.Size}");
+                            //Console.WriteLine($"page.Size = {page.Size}");
                         }
                     }
 
@@ -1046,6 +1030,7 @@ namespace Scanner
                 {
                     // Add pages and images here.
                     document.Save(finalPdf);
+                    Console.WriteLine($"document.FileSize = {document.FileSize}");
                 }
 
 
@@ -1069,6 +1054,7 @@ namespace Scanner
                 Globals.totalImageMB = 0;
                 Console.WriteLine($"Before Resetting to 0 ---  pageNumber={Globals.pageNumber} totalImageBytes={Globals.totalImageBytes} totalEstImageBytes={Globals.totalEstImageBytes} totalImageKB={Globals.totalImageKB} totalImageMegaBytes {Globals.totalImageMB}");
 
+                Console.WriteLine("**************   EXITED CreateFinalPdf *************");
 
                 return finalPdf;
             }
@@ -1080,108 +1066,11 @@ namespace Scanner
                     "Could not create final PDF.\r\n\r\n" +
                     ex.Message);
 
+                Console.WriteLine("**************   EXITED CreateFinalPdf *************");
 
                 return null;
             }
-        }
 
-
-        public long EstimateDynamicPdfSize()
-        {
-            long estimatedTotalBytes = 0;
-
-            for (int i = 1; i <= Globals.pageNumber; i++)
-            {
-                string imagePath = Path.Combine(Globals.scanSessionDirectory, $"Page_{i:D4}.bmp");
-                if (!File.Exists(imagePath)) continue;
-
-                FileInfo fi = new FileInfo(imagePath);
-                long bmpSize = fi.Length;
-
-                // Skip incomplete/empty files
-                if (bmpSize == 0) continue;
-
-                double factor = 0.45; // Default to color factor
-                Console.WriteLine("Default Color factor " + factor);
-                Console.WriteLine("imagePath " + imagePath);
-                Console.WriteLine("BMP file info size " + bmpSize);
-
-                try
-                {
-                    // Open via FileStream with FileShare.ReadWrite to prevent crashes if the scanner is still writing
-                    using (var fs = new FileStream(imagePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-                    // Disabling embedded color management & validation speeds this up drastically
-                    using (System.Drawing.Image img = System.Drawing.Image.FromStream(fs, false, false))
-                    {
-                        if (img.PixelFormat == System.Drawing.Imaging.PixelFormat.Format1bppIndexed)
-                        {
-                            factor = 0.25; // Pure Black and White
-                            Console.WriteLine("Black and white factor " + factor);
-                        }
-                        else if (img.PixelFormat == System.Drawing.Imaging.PixelFormat.Format8bppIndexed)
-                        {
-                            factor = 0.15; // Grayscale
-                            Console.WriteLine("Grayscale factor " + factor);
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    // Log it but don't crash the whole app; fall back to the safe default color factor
-                    Console.WriteLine($"Warning: Could not read metadata for {imagePath}. Using default estimation. Details: {ex.Message}");
-                }
-
-                // Apply compression factor + add 2KB PDF page overhead
-                estimatedTotalBytes += (long)(bmpSize * factor) + 2048;
-            }
-
-            return estimatedTotalBytes;
-        }
-
-        
-        public long EstimatePdfSizeInBytes()
-        {
-            long totalBmpBytes = 0;
-            int validPages = 0;
-
-            for (int i = 1; i <= Globals.pageNumber; i++)
-            {
-                string imagePath = Path.Combine(Globals.scanSessionDirectory, $"Page_{i:D4}.bmp");
-                if (File.Exists(imagePath))
-                {
-                    totalBmpBytes += new FileInfo(imagePath).Length;
-                    validPages++;
-                }
-            }
-
-            // Adjust this multiplier based on your typical document types (e.g., 0.10 for text scans)
-            double compressionFactor = 0.15;
-            long estimatedImageBytes = (long)(totalBmpBytes * compressionFactor);
-
-            // Add roughly 2 KB of PDF layout overhead per page
-            long pdfOverheadBytes = validPages * 2048;
-
-            return estimatedImageBytes + pdfOverheadBytes;
-        }
-
-        public static long GetScannedImagesSizeBytes()
-        {
-            if (string.IsNullOrWhiteSpace(Globals.scanSessionDirectory) ||
-                !Directory.Exists(Globals.scanSessionDirectory))
-            {
-                return 0;
-            }
-
-            long totalBytes = 0;
-
-            foreach (string file in Directory.GetFiles(
-                Globals.scanSessionDirectory, "*.bmp"))
-            {
-               
-                totalBytes += new FileInfo(file).Length;
-            }
-
-            return totalBytes;
         }
 
 

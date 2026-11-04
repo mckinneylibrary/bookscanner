@@ -6,7 +6,6 @@
  */
 
 using System;
-using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Threading.Tasks;
@@ -74,11 +73,11 @@ namespace Scanner
 
             txtTo.BackColor = txtBackColor;
             txtTo.ForeColor = txtForeColor;
-            AddField(layout, "To:", txtTo, 0);
+            AddField(layout, "TO:", txtTo, 0);
 
             txtCc.BackColor = txtBackColor;
             txtCc.ForeColor = txtForeColor;
-            AddField(layout, "Cc:", txtCc, 1);
+            AddField(layout, "CC:", txtCc, 1);
 
             txtSubject.BackColor = txtBackColor;
             txtSubject.ForeColor = txtForeColor;
@@ -111,7 +110,21 @@ namespace Scanner
             btnSend.BackColor = Color.Green;
             btnSend.ForeColor = Color.White;
             btnSend.Font = Globals.boldUiFont;
-            btnSend.Click += async (s, e) => await SendEmailAsync();
+            btnSend.Click += async (s, e) =>
+            {
+                btnSend.Enabled = false;
+                btnCancel.Enabled = false;
+                btnClear.Enabled = false;
+
+                await SendEmailAsync();
+
+                btnSend.Enabled = true;
+                btnCancel.Enabled = true;
+                btnClear.Enabled = true;
+
+            };
+
+
 
             btnClear.Text = "Clear";
             btnClear.Dock = DockStyle.Fill;
@@ -137,22 +150,25 @@ namespace Scanner
 
             btnCancel.Click += (s, e) =>
             {
-               
-                DialogResult result = MessageBox.Show(
-                    "Are you sure you want to cancel?\r\n\r\n" +
-                    "The scanned document will be permanently deleted. \r\n" +
-                    "You will need to scan the pages again if you wish to email them.",
-                    "Cancel Email Send",
-                    MessageBoxButtons.YesNo,
-                    MessageBoxIcon.Warning);
 
-                if (result == DialogResult.Yes)
+                using (ConfirmForm confirmForm =
+                new ConfirmForm("You will need to scan the pages again \n if you wish to email them.",
+                "Cancel Email Send", 
+                "The scanned document will be permanently deleted.",
+                "Are you sure you want to cancel?",
+                DialogResult.Yes,
+                MessageBoxIcon.Warning))
                 {
-                    this.DialogResult = DialogResult.Cancel;
-                    this.Close();
+                    DialogResult result = confirmForm.ShowDialog(this);
+
+                    if (result == DialogResult.Yes)
+                    {
+                        this.DialogResult = DialogResult.Cancel;
+                        this.Close();
+                    }
                 }
 
-                    
+
             };
 
             // Three - button panel
@@ -204,11 +220,7 @@ namespace Scanner
             layout.Controls.Add(hint, 0, 6);
             layout.SetColumnSpan(hint, 2);
 
-
-
-            /////  ************************************************
             // Custom touchscreen keyboard
-
             keyboard = new FlowLayoutPanel
             {
                 Dock = DockStyle.Fill,
@@ -269,18 +281,10 @@ namespace Scanner
             txtMessage.Enter += (s, e) => activeTextBox = txtMessage;
 
 
-            btnSend.Click += (s, e) =>
-             {
-                 btnSend.Enabled = false;
-                 btnCancel.Enabled = false;
-                 btnClear.Enabled = false;
-             };
-
-
         }
 
         private void AddCenteredRow(
-    FlowLayoutPanel parent, string letters)
+            FlowLayoutPanel parent, string letters)
         {
             FlowLayoutPanel row = new FlowLayoutPanel
             {
@@ -464,35 +468,139 @@ namespace Scanner
 
         private async Task SendEmailAsync()
         {
-            // TODO:  Place this on a Config File so that I can modify it witout having to rebuild the code.
-            //string fromAddress = "rosahmelendez@sbcglobal.net";
-            string fromAddress = ConfigurationManager.AppSettings["FromAddress"];
-            Console.WriteLine($"TODO SendEmailAsync fromAddress {fromAddress}");
-            btnSend.Enabled = false;
-            btnCancel.Enabled = false;
-            btnClear.Enabled = false;
-
-            // Change this to the actual scanned document path.
-            //string attachmentPath = @"C:\Scans\document.pdf";
-            string attachmentPath = Globals.createdPdf;
-
+            //  TO email is required, validate user has entered email address.
             if (string.IsNullOrWhiteSpace(txtTo.Text))
             {
-                System.Windows.Forms.MessageBox.Show(
-                    "Please enter a recipient email address.");
+                using (ConfirmForm confirmForm = 
+                    new ConfirmForm("TO: sender email is missing",
+                    "Missing Email",
+                    "Please enter a recipient email address.", 
+                    "",
+                    DialogResult.OK,
+                    MessageBoxIcon.Information))
+                {
+                    DialogResult result = confirmForm.ShowDialog(this);
+                }
                 txtTo.Focus();
                 return;
             }
 
+            // Validate TO email format
+            try
+            {
+                var email = new System.Net.Mail.MailAddress(txtTo.Text.Trim());
+
+                if (email.Address != txtTo.Text.Trim())
+                    throw new FormatException();
+            }
+            catch (FormatException)
+            {
+
+                using (ConfirmForm confirmForm = 
+                    new ConfirmForm("Please enter a valid TO email address.",
+                    "Invalid Email",
+                    "Please enter ONLY ONE valid recipient email address.",
+                    "",
+                    DialogResult.OK,
+                    MessageBoxIcon.Information))
+                {
+                    DialogResult result = confirmForm.ShowDialog(this);
+                }
+
+                txtTo.Focus();
+                txtTo.SelectAll();
+                return;
+            }
+
+
+            // Confirm TO recipient email address
+            using (ConfirmForm confirmForm =
+                new ConfirmForm(txtTo.Text.Trim()))
+            {
+                DialogResult result = confirmForm.ShowDialog(this);
+
+                if (result != DialogResult.Yes)
+                {
+                    txtTo.Focus();
+                    txtTo.SelectAll();
+                    return;
+                }
+            }
+
+            // if user entered something in the CC text field
+            // validate email information.
+            if (!string.IsNullOrWhiteSpace(txtCc.Text))
+            {
+
+                // Validate CC email format
+                try
+                {
+                    var email = new System.Net.Mail.MailAddress(txtCc.Text.Trim());
+
+                    if (email.Address != txtCc.Text.Trim())
+                        throw new FormatException();
+
+                }
+                catch (FormatException)
+                {
+
+
+                    using (ConfirmForm confirmForm =
+                        new ConfirmForm("Please enter a valid CC email address.",
+                        "Invalid Email",
+                        "Please enter ONLY ONE valid recipient email address.",
+                        "",
+                        DialogResult.OK,
+                        MessageBoxIcon.Information))
+                    {
+                        DialogResult result = confirmForm.ShowDialog(this);
+                    }
+
+                    txtCc.Focus();
+                    txtCc.SelectAll();
+                    return;
+                }
+
+                // Confirm CC recipient email address
+                using (ConfirmForm confirmForm =
+                new ConfirmForm(txtCc.Text.Trim()))
+                {
+                    DialogResult result = confirmForm.ShowDialog(this);
+
+                    if (result != DialogResult.Yes)
+                    {
+                        txtCc.Focus();
+                        txtCc.SelectAll();
+                        return;
+                    }
+                }
+
+            }
+
             if (string.IsNullOrWhiteSpace(txtSubject.Text))
             {
-                System.Windows.Forms.MessageBox.Show(
-                    "Please enter a subject.");
+                using (ConfirmForm confirmForm = 
+                    new ConfirmForm("Please enter a subject message.",
+                    "Subject Missing",
+                    "Subject is required",
+                    "",
+                    DialogResult.OK,
+                    MessageBoxIcon.Information))
+                {
+                    DialogResult result = confirmForm.ShowDialog(this);
+                }
+
                 txtSubject.Focus();
                 return;
             }
 
-            btnSend.Enabled = false;
+            // FromAddress is set in the App.config file.
+            // This can be updated and application restarted for change to take effect
+            string fromAddress = ConfigurationManager.AppSettings["FromAddress"];
+            Console.WriteLine($"SendEmailAsync fromAddress {fromAddress}");
+
+            string attachmentPath = Globals.createdPdf;
+
 
             try
             {
@@ -506,19 +614,32 @@ namespace Scanner
 
                 if (messageId == null)
                 {
-                    System.Windows.Forms.MessageBox.Show(
-                        "FAILED to send email. \n\nPlease try again later.",
-                        "Email Error",
-                        System.Windows.Forms.MessageBoxButtons.OK,
-                        System.Windows.Forms.MessageBoxIcon.Information);
+
+                    using (ConfirmForm confirmForm =
+                        new ConfirmForm("Please try again later.",
+                        "Failed to Sent",
+                        "FAILED to send email.",
+                        "",
+                        DialogResult.OK,
+                        MessageBoxIcon.Error))
+                    {
+                        DialogResult result = confirmForm.ShowDialog(this);
+                    }
+
                 }
                 else
                 {
-                    System.Windows.Forms.MessageBox.Show(
-                        "Email sent successfully!\nMessage ID: " + messageId,
-                        "Email Sent",
-                        System.Windows.Forms.MessageBoxButtons.OK,
-                        System.Windows.Forms.MessageBoxIcon.Information);
+                    using (ConfirmForm confirmForm =
+                        new ConfirmForm("Message ID: " + messageId,
+                        "Successfully Sent",
+                        "Email sent successfully!",
+                        "",
+                        DialogResult.OK,
+                        MessageBoxIcon.Error))
+                    {
+                        DialogResult result = confirmForm.ShowDialog(this);
+                    }
+
                 }
 
                 txtTo.Clear();
@@ -535,38 +656,41 @@ namespace Scanner
             {
                 MessageBox.Show(
                     "The scanned document could not be found.\n\n" +
-                    "Please ask a library staff member for assistance.",
+                    "Please scan documentas, and try again.",
                     "Document Not Found",
                     MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
+                    MessageBoxIcon.Information);
             }
             catch (Amazon.Runtime.AmazonServiceException ex)
             {
                 Scanner.Logger.Exception(ex, "SES service error: ");
 
-                MessageBox.Show(
-                    "The email service is temporarily unavailable.\n\n" +
-                    "Please try again later or ask a library staff member for assistance.",
+                using (ConfirmForm confirmForm =
+                    new ConfirmForm("The email service is temporarily unavailable.",
                     "Email Service Unavailable",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
+                    "Please try again later.",
+                    "",
+                    DialogResult.OK,
+                    MessageBoxIcon.Error))
+                {
+                    DialogResult result = confirmForm.ShowDialog(this);
+                }
             }
             catch (Exception ex)
             {
                 Scanner.Logger.Exception(ex, "Email sending failed: ");
 
-                MessageBox.Show(
-                    "Your email could not be sent.\n\n" +
-                    "Please try again later or ask a library staff member for assistance.",
+                using (ConfirmForm confirmForm = 
+                    new ConfirmForm("Your email could not be sent.",
                     "Email Error",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
-            }
-            finally
-            {
-                btnSend.Enabled = true;
+                    "Please try again later.",
+                    "",
+                    DialogResult.OK,
+                    MessageBoxIcon.Error))
+                {
+                    DialogResult result = confirmForm.ShowDialog(this);
+                }
             }
         }
-
     }
 }

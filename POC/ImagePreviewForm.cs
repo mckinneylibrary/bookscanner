@@ -6,6 +6,7 @@
  */
 
 using Amazon.Auth.AccessControlPolicy;
+using Scanner;
 using System;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -98,7 +99,7 @@ public partial class ImagePreviewForm : Form
             Height = 35,
             Left = 360,
             Top = 12,
-            Enabled = true
+            Enabled = false
         };
         saveRotationButton.Click += (s, e) => SaveRotatedImage();
         buttonPanel.Controls.Add(saveRotationButton);
@@ -158,11 +159,17 @@ public partial class ImagePreviewForm : Form
             RotatedImage?.Dispose();
             RotatedImage = new Bitmap(pictureBox.Image);
 
-            MessageBox.Show(
-                "The rotated image has been saved.",
+
+            using (ConfirmForm confirmForm = 
+                new ConfirmForm($"{Path.GetFileName(filePath)}",
                 "Image Saved",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Information);
+                "The rotated image has been saved.",
+                "",
+                DialogResult.OK,
+                MessageBoxIcon.Information))
+            {
+                DialogResult result = confirmForm.ShowDialog(this);
+            }
 
             //  return Cancel, do not delete the rotated image
             //  and close the window.
@@ -174,12 +181,19 @@ public partial class ImagePreviewForm : Form
             if (File.Exists(tempPath))
                 File.Delete(tempPath);
 
-            MessageBox.Show(
-                "Unable to save the rotated image.\r\n\r\n" +
-                ex.Message,
+            Console.WriteLine(ex.Message);
+
+            using (ConfirmForm confirmForm =
+                new ConfirmForm("Unable to save the rotated image.",
                 "Save Error",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Error);
+                "",
+                "",
+                DialogResult.OK,
+                MessageBoxIcon.Error))
+            {
+                DialogResult result = confirmForm.ShowDialog(this);
+            }
+
         }
     }
 
@@ -224,20 +238,27 @@ public partial class ImagePreviewForm : Form
 
     private void DeleteButton_Click(object sender, EventArgs e)
     {
-        DialogResult confirm = MessageBox.Show(
-            "Are you sure you want to delete this document?",
+
+        using (ConfirmForm confirmForm = 
+            new ConfirmForm($"{Path.GetFileName(filePath)}",
             "Delete Document",
-            MessageBoxButtons.YesNo,
-            MessageBoxIcon.Warning);
-
-        if (confirm == DialogResult.Yes)
+            "The scanned document will be permanently deleted.",
+            "Are you sure you want to delete this document?",
+            DialogResult.Yes,
+            MessageBoxIcon.Warning))
         {
-            pictureBox.Image?.Dispose();
-            pictureBox.Image = null;
+            DialogResult result = confirmForm.ShowDialog(this);
 
-            DialogResult = DialogResult.OK;
-            Close();
+            if (result == DialogResult.Yes)
+            {
+                pictureBox.Image?.Dispose();
+                pictureBox.Image = null;
+
+                DialogResult = DialogResult.OK;
+                Close();
+            }
         }
+
     }
 
     // =========================================================
@@ -260,6 +281,8 @@ public partial class ImagePreviewForm : Form
 
         if (pictureBox.Image == null)
             return;
+
+        saveRotationButton.Enabled = true;
 
         pictureBox.Image.RotateFlip(
             RotateFlipType.Rotate90FlipNone);
