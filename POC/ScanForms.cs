@@ -2012,11 +2012,24 @@ namespace Scanner
                 if (success)
                 {
                     MessageBox.Show(
-                        ("Files successfully copied to USB drive "),
+                        ("Files successfully copied to USB drive."),
                         "Copy Complete",
                         MessageBoxButtons.OK,
                         MessageBoxIcon.Information);
+
+                    using (ConfirmForm confirmForm = 
+                        new ConfirmForm("Files successfully copied to USB drive.",
+                        "Copy Complete",
+                        "",
+                        "",
+                        DialogResult.OK,
+                        MessageBoxIcon.Information))
+                    {
+                        DialogResult result = confirmForm.ShowDialog(this);
+                    }
+
                 }
+
             }
 
         }
@@ -2204,11 +2217,18 @@ namespace Scanner
 
                     if (success)
                     {
-                        MessageBox.Show(
-                            ("Files successfully copied to  USB drive."),
+
+                        using (ConfirmForm confirmForm = 
+                            new ConfirmForm("Files successfully copied to USB drive.",
                             "Copy Complete",
-                            MessageBoxButtons.OK,
-                            MessageBoxIcon.Information);
+                            "",
+                            "",
+                            DialogResult.OK,
+                            MessageBoxIcon.Information))
+                        {
+                            DialogResult result = confirmForm.ShowDialog(this);
+                        }
+
                     }
 
                 }
