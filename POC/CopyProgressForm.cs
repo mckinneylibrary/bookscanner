@@ -41,7 +41,7 @@ namespace Scanner
                     Left = 20,
                     Top = 5,
                     Width = 440,
-                    Height = 80,
+                    Height = 60,
                     Text = message,
                     TextAlign = ContentAlignment.MiddleCenter,
                     Font = Globals.normalUiFont
@@ -51,7 +51,7 @@ namespace Scanner
                 progressBar = new ProgressBar
                 {
                     Left = 20,
-                    Top = 90,
+                    Top = 80,
                     Width = 440,
                     Height = 25,
                     Minimum = 0,

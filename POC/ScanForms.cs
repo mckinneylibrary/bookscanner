@@ -2010,14 +2010,9 @@ namespace Scanner
 
                 if (success)
                 {
-                    MessageBox.Show(
-                        ("Files successfully copied to USB drive."),
-                        "Copy Complete",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Information);
 
-                    using (ConfirmForm confirmForm = 
-                        new ConfirmForm("Files successfully copied to USB drive.",
+                    using (ConfirmForm confirmForm =
+                        new ConfirmForm("BMP files successfully copied to USB drive.",
                         "Copy Complete",
                         "",
                         "",
@@ -2210,12 +2205,11 @@ namespace Scanner
 
             if (usbCheckBox.Checked)
             {
+                bool success = false;
                 using (CopyProgressForm progressForm =
                         new CopyProgressForm("Please wait.....\nCoping PDF file to USB.", false))
                 {
                     progressForm.Show(this);
-
-                    bool success = false;
 
                     await Task.Run(() =>
                     {
@@ -2224,25 +2218,22 @@ namespace Scanner
 
                     progressForm.Close();
 
-
-                    if (success)
-                    {
-
-                        using (ConfirmForm confirmForm = 
-                            new ConfirmForm("Files successfully copied to USB drive.",
-                            "Copy Complete",
-                            "",
-                            "",
-                            DialogResult.OK,
-                            MessageBoxIcon.Information))
-                        {
-                            DialogResult result = confirmForm.ShowDialog(this);
-                        }
-
-                    }
-
                 }
 
+                if (success)
+                {
+
+                    using (ConfirmForm confirmForm =
+                        new ConfirmForm("PDF file successfully copied to USB drive.",
+                        "Copy Complete",
+                        "",
+                        "",
+                        DialogResult.OK,
+                        MessageBoxIcon.Information))
+                    {
+                        DialogResult result = confirmForm.ShowDialog(this);
+                    }
+                }
 
                 // Only delete after successful delivery
                 if (File.Exists(Globals.pdfFilePath))
