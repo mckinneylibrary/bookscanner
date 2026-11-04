@@ -1,0 +1,14 @@
+# Visual Studio
+.vs/
+*.suo
+*.user
+
+# Build output
+[Bb]in/
+[Oo]bj/
+
+# Debug files
+*.pdb
+
+# Visual Studio cache
+*.cache
