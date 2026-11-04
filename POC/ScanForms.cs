@@ -1233,13 +1233,6 @@ namespace Scanner
 
                 LoadDocument(Globals.scanningInstructionsFile);
 
-                pdfViewer.PerformLayout();
-                pdfViewer.Renderer.Page = 0;
-                pdfViewer.Renderer.Zoom = 1;
-                pdfViewer.ZoomMode = PdfViewerZoomMode.FitBest;
-                pdfViewer.PerformLayout();
-                pdfViewer.Invalidate();
-
 
                 // Delete after patron has discarded this document.
                 if (File.Exists(Globals.pdfFilePath))
@@ -1298,6 +1291,9 @@ namespace Scanner
             pageLabel.Text = "Pages scanned: 0";
 
 
+
+
+
         }
 
 
@@ -1350,8 +1346,6 @@ namespace Scanner
                     pictureBox1.Image = new Bitmap(image);
                     oldImage?.Dispose();
 
-                    //pictureBox1.Image?.Dispose();
-                    //pictureBox1.Image = new Bitmap(image);
                 }
 
                 pictureBox1.SizeMode = PictureBoxSizeMode.Zoom;
@@ -1359,11 +1353,16 @@ namespace Scanner
                 pdfViewer.Visible = false;
             }
 
-
-
             statusLabel.Text =
                 "Ready to scan";
 
+            // reset PDF viewer to best fit
+            pdfViewer.PerformLayout();
+            pdfViewer.Renderer.Page = 0;
+            pdfViewer.Renderer.Zoom = 1;
+            pdfViewer.ZoomMode = PdfViewerZoomMode.FitBest;
+            pdfViewer.PerformLayout();
+            pdfViewer.Invalidate();
         }
 
         // -------------------------------------------------
@@ -2099,11 +2098,22 @@ namespace Scanner
                     statusLabel.Text =
                         "PDF could not be created.";
 
-                    MessageBox.Show(
-                        "No PDF was created.",
+                    using (ConfirmForm confirmForm = 
+                        new ConfirmForm("No PDF was created.",
                         "PDF Error",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Error);
+                        "",
+                        "",
+                        DialogResult.OK,
+                        MessageBoxIcon.Error))
+                    {
+                        DialogResult result = confirmForm.ShowDialog(this);
+
+                        if (result == DialogResult.Yes)
+                        {
+                            this.DialogResult = DialogResult.Cancel;
+                            this.Close();
+                        }
+                    }
 
                     // Close scanner properly
                     scanner.Close();
