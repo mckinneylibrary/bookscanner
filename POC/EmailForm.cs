@@ -629,7 +629,7 @@ namespace Scanner
             // FromAddress is set in the App.config file.
             // This can be updated and application restarted for change to take effect
             string fromAddress = ConfigurationManager.AppSettings["FromAddress"];
-            Console.WriteLine($"SendEmailAsync fromAddress {fromAddress}");
+            Logger.Log($"SendEmailAsync fromAddress {fromAddress}");
 
             string attachmentPath = Globals.createdPdf;
 

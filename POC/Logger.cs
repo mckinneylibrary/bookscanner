@@ -31,6 +31,9 @@ namespace Scanner
 
         private static string _logFilePath;
 
+        // if LoggerDebug is set to true, save the INFO logs
+        // Error, Warning, and Exceptions will always save to log.
+        private static bool LoggerDebug = bool.Parse(ConfigurationManager.AppSettings["LoggerDebug"]);
         public static string LogFilePath
         {
             get { return _logFilePath; }
@@ -74,7 +77,10 @@ namespace Scanner
                 Log("==================================================");
 
                 // Capture Console.WriteLine and Console.Error.WriteLine.
-                Console.SetOut(new LogTextWriter(Console.Out, false));
+                if (LoggerDebug)
+                {
+                    Console.SetOut(new LogTextWriter(Console.Out, false));
+                }
                 Console.SetError(new LogTextWriter(Console.Error, true));
 
                 // Capture Debug.WriteLine and Trace.WriteLine.
@@ -93,7 +99,7 @@ namespace Scanner
                 // This can be updated and application restarted for change to take effect
                 int LogCutoffDays = int.Parse(ConfigurationManager.AppSettings["LogCutoffDays"]);
                 DateTime cutoffDate = DateTime.Now.AddDays(-LogCutoffDays);
-                Console.WriteLine($"DeleteOldLogFiles cutoffDate {cutoffDate}");
+                Log($"DeleteOldLogFiles cutoffDate {cutoffDate}");
 
                 foreach (string file in Directory.GetFiles(
                     logDirectory, "application_*.log"))
@@ -155,7 +161,10 @@ namespace Scanner
         }
         public static void Log(string message)
         {
-            Write("INFO", message);
+            if (LoggerDebug)
+            {
+                Write("INFO", message);
+            }
         }
 
         public static void Warning(string message)
