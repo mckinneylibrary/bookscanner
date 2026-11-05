@@ -5,11 +5,11 @@
  * @Version:  1.0
  */
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.IO;
-using System.Windows.Forms;
+using System.Configuration;
 using System.Drawing;
+using System.IO;
+using System.Linq;
+using System.Windows.Forms;
 
 
 namespace Scanner
@@ -22,7 +22,7 @@ namespace Scanner
         public const string exitAppImageFile = @"C:\BookScanner7145\McKinneyPublicLibrary.png";
         public const int requiredSecurityClicks = 5;
         public const int requiredSecuritySeconds = 1;
-        public const int PDFMaxSize = 9437184;  // 9 MB
+        
         public const double StandardScanResolutionDpi = 150.0;
         public const double HighScanResolutionDpi = 200.0;
         public const double StandardTextScanResolutionDpi = 200.0;
@@ -43,8 +43,9 @@ namespace Scanner
         public static double totalEstImageBytes;
         public static double totalImageKB;
         public static double totalImageMB;
+        public static int PDFMaxSize = int.Parse(ConfigurationManager.AppSettings["PDFMaxSize"]);
 
-        
+
         public static double selectedDPI = StandardTextScanResolutionDpi;
 
         public static Font boldUiFont;
