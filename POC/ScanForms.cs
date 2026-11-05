@@ -1978,8 +1978,8 @@ namespace Scanner
                 return;
             } 
 
-            using (CopyProgressForm progressForm =
-           new CopyProgressForm("Please wait.....\nCoping BMP file to USB.", true))
+            using (ProgressForm progressForm =
+           new ProgressForm("Please wait.....\nCoping BMP file to USB.", true))
             {
                 progressForm.Show(this);
 
@@ -2068,8 +2068,8 @@ namespace Scanner
                 string pdfPath =
                     Globals.pdfFilePath;
 
-                using (CopyProgressForm progressForm = 
-                    new CopyProgressForm("Please wait.....\nCreating PDF file.", false))
+                using (ProgressForm progressForm = 
+                    new ProgressForm("Please wait.....\nCreating PDF file.", false))
                 {
                     progressForm.Show(this);
 
@@ -2204,8 +2204,8 @@ namespace Scanner
             if (usbCheckBox.Checked)
             {
                 bool success = false;
-                using (CopyProgressForm progressForm =
-                        new CopyProgressForm("Please wait.....\nCoping PDF file to USB.", false))
+                using (ProgressForm progressForm =
+                        new ProgressForm("Please wait.....\nCoping PDF file to USB.", false))
                 {
                     progressForm.Show(this);
 

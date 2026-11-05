@@ -77,10 +77,10 @@ namespace Scanner
                         var request = new SendRawEmailRequest
                         {
                             Source = fromAddress,
-                            Destinations = new List<string>
-                    {
-                        recipientAddress
-                    },
+                            Destinations = new List<string> 
+                            {
+                                recipientAddress
+                            },
                             RawMessage = new RawMessage
                             {
                                 Data = stream
@@ -89,9 +89,15 @@ namespace Scanner
 
                         try
                         {
-                            var response = await ses.SendRawEmailAsync(
-                                request, cts.Token);
-                            return response.MessageId;
+
+                            using (ProgressForm progressForm =
+                                new ProgressForm("Please wait.....\nSending email.", false))
+                            {
+                                progressForm.Show();
+                                var response = await ses.SendRawEmailAsync(request, cts.Token);
+                                progressForm.Close();
+                                return response.MessageId;
+                            }
 
                         }
                         catch (Amazon.SimpleEmail.AmazonSimpleEmailServiceException ex)

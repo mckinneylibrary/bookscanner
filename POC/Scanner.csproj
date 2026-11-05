@@ -181,7 +181,7 @@
     <Compile Include="EmailForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="CopyProgressForm.cs">
+    <Compile Include="ProgressForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="ImagePreviewForm.cs">

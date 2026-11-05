@@ -11,14 +11,14 @@ using System.Windows.Forms;
 
 namespace Scanner
 {
-    public class CopyProgressForm : Form
+    public class ProgressForm : Form
     {
         private Label lblStatus;
         private Label lblFile;
         private ProgressBar progressBar;
 
 
-        public CopyProgressForm(
+        public ProgressForm(
         string message,
         bool showProgress)
         {
