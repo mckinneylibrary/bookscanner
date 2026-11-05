@@ -6,11 +6,12 @@
  */
 
 using System;
+using System.Configuration;
 using System.Drawing;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Configuration;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.ListView;
 
 namespace Scanner
 {
@@ -514,18 +515,26 @@ namespace Scanner
 
 
             // Confirm TO recipient email address
-            using (ConfirmForm confirmForm =
-                new ConfirmForm(txtTo.Text.Trim()))
-            {
-                DialogResult result = confirmForm.ShowDialog(this);
+            //using (ConfirmForm confirmForm =
+            //    new ConfirmForm(txtTo.Text.Trim()))
+            //{
+            //    DialogResult result = confirmForm.ShowDialog(this);
 
-                if (result != DialogResult.Yes)
-                {
-                    txtTo.Focus();
-                    txtTo.SelectAll();
-                    return;
-                }
-            }
+            //    if (result != DialogResult.Yes)
+            //    {
+            //        txtTo.Focus();
+            //        txtTo.SelectAll();
+            //        return;
+            //    }
+            //}
+
+
+
+            //string FormNameText = "Confirm Email Address";
+            //string MessageText = "Please confirm that the recipient email address is correct:";
+            //string QuestionText = "Do you want to continue?";
+            //CreateConfirmForm(email, FormNameText, MessageText, QuestionText, DialogResult.Yes, MessageBoxIcon.Question);
+
 
             // if user entered something in the CC text field
             // validate email information.
@@ -561,19 +570,19 @@ namespace Scanner
                     return;
                 }
 
-                // Confirm CC recipient email address
-                using (ConfirmForm confirmForm =
-                new ConfirmForm(txtCc.Text.Trim()))
-                {
-                    DialogResult result = confirmForm.ShowDialog(this);
+                //// Confirm CC recipient email address
+                //using (ConfirmForm confirmForm =
+                //new ConfirmForm(txtCc.Text.Trim()))
+                //{
+                //    DialogResult result = confirmForm.ShowDialog(this);
 
-                    if (result != DialogResult.Yes)
-                    {
-                        txtCc.Focus();
-                        txtCc.SelectAll();
-                        return;
-                    }
-                }
+                //    if (result != DialogResult.Yes)
+                //    {
+                //        txtCc.Focus();
+                //        txtCc.SelectAll();
+                //        return;
+                //    }
+                //}
 
             }
 
@@ -592,6 +601,29 @@ namespace Scanner
 
                 txtSubject.Focus();
                 return;
+            }
+
+            string emails = $"TO: {txtTo.Text.Trim()}";
+            if (txtCc.Text.Trim().Length > 0)
+            {
+                emails = emails + $"\nCC: {txtCc.Text.Trim()}";
+            }
+            using (ConfirmForm confirmForm = 
+                new ConfirmForm(emails,
+                "Confirm Email Address",
+                "Once you continue, you cannot cancel the delivery.",
+                "Continue delivery to above email(s)?",
+                DialogResult.Yes,
+                MessageBoxIcon.Question))
+            {
+                DialogResult result = confirmForm.ShowDialog(this);
+
+                if (result != DialogResult.Yes)
+                {
+                    txtTo.Focus();
+                    txtTo.SelectAll();
+                    return;
+                }
             }
 
             // FromAddress is set in the App.config file.
