@@ -1650,19 +1650,17 @@ namespace Scanner
                     GC.GetTotalMemory(false) / (1024.0 * 1024.0);
 
                 string message =
-                    $"***********************************************\n" +
-                    $"****** Memory Usage \n" +
-                    $"****** Working Set: {workingSetMB:F2} MB  \n " +
-                    $"****** Private Memory: {privateMemoryMB:F2} MB  \n " +
-                    $"****** Managed Heap: {managedHeapMB:F2} MB  \n" +
-                    $"***********************************************\n";
+                    $"\n***********************************************" +
+                    $"\n****** Memory Usage" +
+                    $"\n****** Working Set: {workingSetMB:F2} MB" +
+                    $"\n****** Private Memory: {privateMemoryMB:F2} MB" +
+                    $"\n****** Managed Heap: {managedHeapMB:F2} MB" +
+                    $"\n***********************************************";
 
                 // Replace with your application's logger.
                 Logger.Log(message);
-                Console.WriteLine(message);
-
-                Logger.Error(message);
-                Logger.Warning(message);
+                //Logger.Error(message);
+                //Logger.Warning(message);
                 //Logger.Exception(ex, "ERROR DURING FORM CLOSING CLEANUP: " + ex);
 
             }

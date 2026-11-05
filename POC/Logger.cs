@@ -14,6 +14,16 @@ using System.Configuration;
 
 namespace Scanner
 {
+    /**
+     * 
+     * Logger.Log(message);
+     * Logger.Error(message);
+     * Logger.Warning(message);
+     * Logger.Exception(ex, "ERROR DURING FORM CLOSING CLEANUP: " + ex);
+     * 
+     */
+    
+
     public static class Logger
     {
         private static readonly object _lock = new object();
