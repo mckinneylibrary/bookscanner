@@ -629,7 +629,7 @@ namespace Scanner
             // FromAddress is set in the App.config file.
             // This can be updated and application restarted for change to take effect
             string fromAddress = ConfigurationManager.AppSettings["FromAddress"];
-            Logger.Log($"SendEmailAsync fromAddress {fromAddress}");
+            Logger.LogDebug($"SendEmailAsync fromAddress {fromAddress}");
 
             string attachmentPath = Globals.createdPdf;
 
@@ -695,7 +695,7 @@ namespace Scanner
             }
             catch (Amazon.Runtime.AmazonServiceException ex)
             {
-                Scanner.Logger.Exception(ex, "SES service error: ");
+                Scanner.Logger.Exception(ex, "AmazonServiceException SES service error: ");
 
                 using (ConfirmForm confirmForm =
                     new ConfirmForm("The email service is temporarily unavailable.",

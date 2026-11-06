@@ -188,6 +188,7 @@ namespace Scanner
 
             Controls.Add(mainAppPanel);
 
+
             scanSelectionPanel = new Panel
             {
                 Location = new Point(10, 20),
@@ -883,7 +884,7 @@ namespace Scanner
 
         private void Thumbnail_DoubleClick(object sender, EventArgs e)
         {
-            Console.WriteLine("******************  Entered Thumbnail_DoubleClick  **************");
+            Logger.LogDebug("******************  Entered Thumbnail_DoubleClick  **************");
 
             PictureBox thumbnail = sender as PictureBox;
             DialogResult result;
@@ -899,7 +900,7 @@ namespace Scanner
                 
                 result = preview.ShowDialog(this);
 
-                Console.WriteLine("******* ImagePreviewForm ShowDialog result: " + result);
+                Logger.LogDebug("******* ImagePreviewForm ShowDialog result: " + result);
 
                 if (result == DialogResult.OK)
                 {
@@ -945,7 +946,7 @@ namespace Scanner
                 }
                 else
                 {
-                    Console.WriteLine("******* Thumbnail_DoubleClick Canceled Or Rotated Image" + filePath);
+                    Logger.LogDebug("******* Thumbnail_DoubleClick Canceled Or Rotated Image" + filePath);
                     // if we havae a rotated image save it to thumbnail
                     // so that it is displayed in the UI.
                     if (preview.RotatedImage != null)
@@ -995,7 +996,7 @@ namespace Scanner
 
         private void Thumbnail_MouseDown(object sender, MouseEventArgs e)
         {
-            Console.WriteLine("********** ENTERED Thumbnail_MouseDown **********");
+            Logger.LogDebug("********** ENTERED Thumbnail_MouseDown **********");
 
             if (e.Button != MouseButtons.Right)
                 return;
@@ -1081,7 +1082,7 @@ namespace Scanner
                     MessageBoxIcon.Error);
             }
 
-            Console.WriteLine("********** EXITED Thumbnail_MouseDown **********");
+            Logger.LogDebug("********** EXITED Thumbnail_MouseDown **********");
         }
 
 
@@ -1123,7 +1124,7 @@ namespace Scanner
 
             TimeSpan elapsed = DateTime.Now - Globals.securityStartTime.Value;
 
-            Console.WriteLine("elapsed: " + elapsed + "  securityCounter:  " + Globals.securityCounter);
+            Logger.LogDebug("elapsed: " + elapsed + "  securityCounter:  " + Globals.securityCounter);
 
             if (Globals.securityCounter >= Globals.requiredSecurityClicks
                 && elapsed.TotalSeconds <= Globals.requiredSecuritySeconds)
@@ -1134,7 +1135,7 @@ namespace Scanner
 
                 // User has clicked button the more then requiredSecurityClicks
                 // within requiredSecuritySeconds
-                Console.WriteLine("PROMPT user for password.");
+                Logger.LogDebug("PROMPT user for password.");
                 
             }
             else if (elapsed.TotalSeconds > Globals.requiredSecuritySeconds)
@@ -1143,13 +1144,13 @@ namespace Scanner
                 Globals.securityCounter = 0;
                 Globals.securityStartTime = null; //DateTime.Now;
 
-                Console.WriteLine("Time window expired, so start a new attempt.  We do not want to prompt user for password.");
+                Logger.LogDebug("Time window expired, so start a new attempt.  We do not want to prompt user for password.");
                 return;
             }
             else
             {
                 // Still within the window, but not enough clicks yet
-                Console.WriteLine("Still within the window, but not enough clicks yet. We do not want to prompt user for password.");
+                Logger.LogDebug("Still within the window, but not enough clicks yet. We do not want to prompt user for password.");
                 return;
             }
 
@@ -1249,6 +1250,11 @@ namespace Scanner
                 pdfPreviewLabel.Text = scannningInstructionsText;                
                 SetButtonEnabled(startScanButton,true);
 
+                // Log memory usage every time a user starts scanning.
+                // This will help monitor memory usage throughout the day.
+                // If prior scanner usage has memory leaks, we should be able to see it in the logs.
+                LogMemoryUsage("DiscardPdfButton");
+
             }
             catch (Exception ex)
             {
@@ -1291,7 +1297,10 @@ namespace Scanner
             pageLabel.Text = "Pages scanned: 0";
 
 
-
+            // Log memory usage every time a user starts scanning.
+            // This will help monitor memory usage throughout the day.
+            // If prior scanner usage has memory leaks, we should be able to see it in the logs.
+            LogMemoryUsage("AcceptPdfButton");
 
 
         }
@@ -1450,12 +1459,12 @@ namespace Scanner
 
                 scanner =
                     new ScannerService();
-                Console.WriteLine("******** New Scanner Service ******************** ");
-                Console.WriteLine("IsScannerOpen " + scanner.IsScannerOpen);
-                Console.WriteLine("PageCount " + Globals.pageNumber);
-                Console.WriteLine("PdfFilePath " + Globals.pdfFilePath);
-                Console.WriteLine("ScannerName " + scanner.ScannerName);
-                Console.WriteLine("**************************** ");
+                Logger.LogDebug("******** New Scanner Service ******************** ");
+                Logger.LogDebug("IsScannerOpen " + scanner.IsScannerOpen);
+                Logger.LogDebug("PageCount " + Globals.pageNumber);
+                Logger.LogDebug("PdfFilePath " + Globals.pdfFilePath);
+                Logger.LogDebug("ScannerName " + scanner.ScannerName);
+                Logger.LogDebug("**************************** ");
 
 
                 // Subscribe to ScannerService events.
@@ -1482,12 +1491,12 @@ namespace Scanner
 
                     return;
                 }
-                Console.WriteLine("******** Open Scanner Service ******************** ");
-                Console.WriteLine("IsScannerOpen " + scanner.IsScannerOpen);
-                Console.WriteLine("PageCount " + Globals.pageNumber);
-                Console.WriteLine("PdfFilePath " + Globals.pdfFilePath);
-                Console.WriteLine("ScannerName " + scanner.ScannerName);
-                Console.WriteLine("**************************** ");
+                Logger.LogDebug("******** Open Scanner Service ******************** ");
+                Logger.LogDebug("IsScannerOpen " + scanner.IsScannerOpen);
+                Logger.LogDebug("PageCount " + Globals.pageNumber);
+                Logger.LogDebug("PdfFilePath " + Globals.pdfFilePath);
+                Logger.LogDebug("ScannerName " + scanner.ScannerName);
+                Logger.LogDebug("**************************** ");
 
 
                 scannerOpen = true;
@@ -1600,7 +1609,7 @@ namespace Scanner
         {
 
 
-            Console.WriteLine(
+            Logger.LogDebug(
                 "ENTERING SetScannerColorModeAndDPI");
 
             if (scanner == null)
@@ -1610,20 +1619,20 @@ namespace Scanner
 
             selectedScanMode = GetSelectedScanMode();
 
-            Console.WriteLine(
+            Logger.LogDebug(
                 "Selected Scan Mode: " +
                 selectedScanMode);
 
             NTwain.Data.PixelType pixelType = GetPixelType();
 
 
-            Console.WriteLine(
+            Logger.LogDebug(
                 "Pixel Type: " +
                 pixelType);
 
             Globals.selectedDPI = GetSelectedDPI();
 
-            Console.WriteLine(
+            Logger.LogDebug(
                 "DPI selected: " +
                 Globals.selectedDPI);
 
@@ -1634,7 +1643,7 @@ namespace Scanner
         }
         
         
-        public static void LogMemoryUsage()
+        public static void LogMemoryUsage(string callingMethod)
         {
             using (Process process = Process.GetCurrentProcess())
             {
@@ -1651,20 +1660,18 @@ namespace Scanner
 
                 string message =
                     $"\n***********************************************" +
-                    $"\n****** Memory Usage" +
+                    $"\n****** Memory Usage [{callingMethod}]" +
                     $"\n****** Working Set: {workingSetMB:F2} MB" +
                     $"\n****** Private Memory: {privateMemoryMB:F2} MB" +
                     $"\n****** Managed Heap: {managedHeapMB:F2} MB" +
                     $"\n***********************************************";
 
                 // Replace with your application's logger.
-                Logger.Log(message);
-                //Logger.Error(message);
-                //Logger.Warning(message);
-                //Logger.Exception(ex, "ERROR DURING FORM CLOSING CLEANUP: " + ex);
+                Logger.Info(message);
 
             }
         }
+
 
 
         // =========================================================
@@ -1676,12 +1683,12 @@ namespace Scanner
             EventArgs e)
         {
             
-            Console.WriteLine("ENTERING StartScanButton_Click");
+            Logger.LogDebug("ENTERING StartScanButton_Click");
 
             // Log memory usage every time a user starts scanning.
             // This will help monitor memory usage throughout the day.
             // If prior scanner usage has memory leaks, we should be able to see it in the logs.
-            LogMemoryUsage();
+            LogMemoryUsage("StartScanButton");
 
             // disable Scanning Options for this duration of the scanning batch
             // until user discard or Accepts PDF
@@ -1750,12 +1757,12 @@ namespace Scanner
             SetButtonEnabled(scanMorePagesButton,false);
             SetButtonEnabled(doneScanningButton,false);
 
-            Console.WriteLine("******** StartAcquisition ******************** ");
-            Console.WriteLine("IsScannerOpen " + scanner.IsScannerOpen);
-            Console.WriteLine("PageCount " + Globals.pageNumber);
-            Console.WriteLine("PdfFilePath " + Globals.pdfFilePath);
-            Console.WriteLine("ScannerName " + scanner.ScannerName);
-            Console.WriteLine("**************************** ");
+            Logger.Info("******** StartAcquisition ******************** ");
+            Logger.Info("IsScannerOpen " + scanner.IsScannerOpen);
+            Logger.Info("PageCount " + Globals.pageNumber);
+            Logger.Info("PdfFilePath " + Globals.pdfFilePath);
+            Logger.Info("ScannerName " + scanner.ScannerName);
+            Logger.Info("**************************** ");
             if (!scanner.StartScan())
             {
                 statusLabel.Text =
@@ -1803,20 +1810,20 @@ namespace Scanner
 
        private bool IsFileSizeOverLimit()
         {
-            Console.WriteLine("********** ENTERED IsFileSizeOverLimit **********");
+            Logger.LogDebug("********** ENTERED IsFileSizeOverLimit **********");
             if (Globals.totalEstImageBytes >= Globals.PDFMaxSize)
             {
-                Console.WriteLine($"EnforceFileSizeLimits is true {Globals.totalEstImageBytes} >= {Globals.PDFMaxSize}");
+                Logger.LogDebug($"EnforceFileSizeLimits is true {Globals.totalEstImageBytes} >= {Globals.PDFMaxSize}");
                 SetButtonEnabled(scanMorePagesButton, false);
                 SetButtonEnabled(doneScanningButton, false);
-                Console.WriteLine("********** exited IsFileSizeOverLimit **********");
+                Logger.LogDebug("********** exited IsFileSizeOverLimit **********");
                 return true;
             } else
             {
-                Console.WriteLine($"EnforceFileSizeLimits is false {Globals.totalEstImageBytes} < {Globals.PDFMaxSize}");
+                Logger.LogDebug($"EnforceFileSizeLimits is false {Globals.totalEstImageBytes} < {Globals.PDFMaxSize}");
                 SetButtonEnabled(scanMorePagesButton, true);
                 SetButtonEnabled(doneScanningButton, true);
-                Console.WriteLine("********** exited IsFileSizeOverLimit **********");
+                Logger.LogDebug("********** exited IsFileSizeOverLimit **********");
                 return false;
             }
 
@@ -1874,7 +1881,7 @@ namespace Scanner
             object sender,
             EventArgs e)
         {
-            Console.WriteLine("********** ENTERED ScanMorePagesButton_Click **********");
+            Logger.LogDebug("********** ENTERED ScanMorePagesButton_Click **********");
             if (IsFileSizeOverLimit())
             {
                 using (ConfirmForm confirmForm =
@@ -1921,7 +1928,7 @@ namespace Scanner
                 SetButtonEnabled(doneScanningButton,true);
             }
 
-            Console.WriteLine("********** EXITED ScanMorePagesButton_Click **********");
+            Logger.LogDebug("********** EXITED ScanMorePagesButton_Click **********");
 
         }
 
@@ -1933,7 +1940,7 @@ namespace Scanner
             object sender,
             EventArgs e)
         {
-            Console.WriteLine("********** ENTERED DoneScanningButton_Click **********");
+            Logger.LogDebug("********** ENTERED DoneScanningButton_Click **********");
 
 
             if (IsFileSizeOverLimit())
@@ -1964,7 +1971,7 @@ namespace Scanner
 
             pdfPreviewLabel.Text = scannedDocuemtnPreviewText;
 
-            Console.WriteLine("********** EXITED DoneScanningButton_Click **********");
+            Logger.LogDebug("********** EXITED DoneScanningButton_Click **********");
         }
 
         // =========================================================
@@ -2176,7 +2183,7 @@ namespace Scanner
                     } catch
                     {
                         Logger.Error("DeliverDocument -  The email service is temporarily unavailable.");
-                        Console.WriteLine("DeliverDocument -  The email service is temporarily unavailable.");
+                        Logger.LogDebug("DeliverDocument -  The email service is temporarily unavailable.");
 
                         using (ConfirmForm confirmForm =
                             new ConfirmForm("The email service is temporarily unavailable.",

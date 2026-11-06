@@ -181,7 +181,7 @@ public partial class ImagePreviewForm : Form
             if (File.Exists(tempPath))
                 File.Delete(tempPath);
 
-            Console.WriteLine(ex.Message);
+            Logger.Error(ex.Message);
 
             using (ConfirmForm confirmForm =
                 new ConfirmForm("Unable to save the rotated image.",
@@ -204,7 +204,7 @@ public partial class ImagePreviewForm : Form
     // =========================================================
     private void LoadImage()
     {
-        Console.WriteLine("******************* Entered LoadImage  ****************");
+        Logger.LogDebug("******************* Entered LoadImage  ****************");
 
         Bitmap loadedBitmap;
 
@@ -220,7 +220,7 @@ public partial class ImagePreviewForm : Form
                 source.HorizontalResolution,
                 source.VerticalResolution);
 
-            Console.WriteLine(
+            Logger.LogDebug(
                 $"Loaded PixelFormat={loadedBitmap.PixelFormat}, " +
                 $"Dimensions={loadedBitmap.Width}x{loadedBitmap.Height}");
 
@@ -277,7 +277,7 @@ public partial class ImagePreviewForm : Form
     // =========================================================
     private void RotateButton_Click(object sender, EventArgs e)
     {
-        Console.WriteLine("****************** Enter RotateButton_Click  ***************************");
+        Logger.LogDebug("****************** Enter RotateButton_Click  ***************************");
 
         if (pictureBox.Image == null)
             return;

@@ -102,8 +102,7 @@ namespace Scanner
                         }
                         catch (Amazon.SimpleEmail.AmazonSimpleEmailServiceException ex)
                         {
-                            Scanner.Logger.Exception(ex, "SES service error: ");
-                            Console.WriteLine(ex);
+                            Logger.Exception(ex, "AmazonSimpleEmailServiceException SES service error: ");
 
                             // Check if the underlying issue is the verification failure
                             string errorMessage = "The email service is NOT unavailable.";
@@ -131,8 +130,6 @@ namespace Scanner
                         catch (Exception ex)
                         {
                             Scanner.Logger.Exception(ex, "Email sending failed: ");
-                            Console.WriteLine(ex);
-                            Console.WriteLine($"ERROR SENDING EMAIL\n{ex}");
 
                             MessageBox.Show(
                                 "Your email could not be sent.\n\n" +

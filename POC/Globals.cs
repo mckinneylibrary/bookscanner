@@ -98,12 +98,12 @@ namespace Scanner
 
         public static string GetFriendlyImageSize()
         {
-            Console.WriteLine("**********   Entered GetFriendlyImageSize *****************");
+            Logger.LogDebug("**********   Entered GetFriendlyImageSize *****************");
 
             // 1. Guard check for empty or zero bytes
             if (totalImageBytes <= 0)
             {
-                Console.WriteLine($"Before Resetting to 0 ---  totalImageBytes={totalImageBytes} totalEstImageBytes={totalEstImageBytes} totalImageMegaBytes {totalImageMB}");
+                Logger.LogDebug($"Before Resetting to 0 ---  totalImageBytes={totalImageBytes} totalEstImageBytes={totalEstImageBytes} totalImageMegaBytes {totalImageMB}");
                 totalImageBytes = 0;
                 totalEstImageBytes = 0;
                 totalImageKB = 0;
@@ -288,27 +288,25 @@ namespace Scanner
         {
 
 
-            Console.WriteLine();
-            Console.WriteLine(
+
+            Logger.LogDebug(
                 "========================================");
 
-            Console.WriteLine(
+            Logger.LogDebug(
                 "PUBLIC COMPUTER CLEANUP");
 
-            Console.WriteLine(
+            Logger.LogDebug(
                 "========================================");
 
-            Console.WriteLine();
-
-            Console.WriteLine(
+            Logger.LogDebug(
                 "Scan directory:");
 
-            Console.WriteLine(Globals.scanFilePath);
+            Logger.LogDebug(Globals.scanFilePath);
 
             if (string.IsNullOrWhiteSpace(
                 Globals.scanFilePath))
             {
-                Console.WriteLine(
+                Logger.LogDebug(
                     "ERROR: Scan directory is empty.");
 
                 return;
@@ -317,7 +315,7 @@ namespace Scanner
             if (!Directory.Exists(
                 Globals.scanFilePath))
             {
-                Console.WriteLine(
+                Logger.LogDebug(
                     "Scan directory does not exist.");
 
                 return;
@@ -335,8 +333,7 @@ namespace Scanner
                         "*",
                         SearchOption.AllDirectories);
 
-                Console.WriteLine();
-                Console.WriteLine(
+                Logger.LogDebug(
                     "Files found: " + files.Length);
 
                 foreach (string file in files)
@@ -357,23 +354,23 @@ namespace Scanner
 
                             File.Delete(file);
 
-                            Console.WriteLine(
+                            Logger.LogDebug(
                                 "Deleted: " + file);
 
                             break;
                         }
                         catch (Exception ex)
                         {
-                            Console.WriteLine();
-                            Console.WriteLine(
+
+                            Logger.Error(
                                 "Delete attempt " +
                                 attempt +
                                 " failed:");
 
-                            Console.WriteLine(
+                            Logger.Error(
                                 file);
 
-                            Console.WriteLine(
+                            Logger.Error(
                                 ex.Message);
 
                             System.Threading.Thread.Sleep(
@@ -409,7 +406,7 @@ namespace Scanner
                             directory,
                             false);
 
-                        Console.WriteLine(
+                        Logger.LogDebug(
                             "Deleted directory: " +
                             directory);
                     }
@@ -417,26 +414,20 @@ namespace Scanner
                     {
                         Scanner.Logger.Exception(ex, "Could not delete directory:");
 
-                        Console.WriteLine(
+                        Logger.Error(
                             directory);
-
-                        Console.WriteLine(
-                            ex.Message);
-
                         
                     }
                 }
 
                 // VERIFY
-
-                Console.WriteLine();
-                Console.WriteLine(
+                Logger.LogDebug(
                     "========================================");
 
-                Console.WriteLine(
+                Logger.LogDebug(
                     "CLEANUP VERIFICATION");
 
-                Console.WriteLine(
+                Logger.LogDebug(
                     "========================================");
 
                 string[] remainingFiles =
@@ -451,24 +442,24 @@ namespace Scanner
                         "*",
                         SearchOption.AllDirectories);
 
-                Console.WriteLine(
+                Logger.LogDebug(
                     "Remaining files: " +
                     remainingFiles.Length);
 
-                Console.WriteLine(
+                Logger.LogDebug(
                     "Remaining directories: " +
                     remainingDirectories.Length);
 
                 // Report remaining files.
                 foreach (string file in remainingFiles)
                 {
-                    Console.WriteLine(
+                    Logger.LogDebug(
                         "STILL EXISTS: " + file);
                 }
 
                 foreach (string directory in remainingDirectories)
                 {
-                    Console.WriteLine(
+                    Logger.LogDebug(
                         "DIRECTORY STILL EXISTS: " +
                         directory);
                 }
@@ -477,24 +468,22 @@ namespace Scanner
                 if (remainingFiles.Length == 0 &&
                     remainingDirectories.Length == 0)
                 {
-                    Console.WriteLine();
-                    Console.WriteLine(
+                    Logger.LogDebug(
                         "SUCCESS:");
 
-                    Console.WriteLine(
+                    Logger.LogDebug(
                         "Scan directory is completely empty.");
                 }
                 else
                 {
-                    Console.WriteLine();
-                    Console.WriteLine(
+
+                    Logger.LogDebug(
                         "WARNING:");
 
-                    Console.WriteLine(
+                    Logger.LogDebug(
                         "Some files could not be deleted.");
 
-                    Console.WriteLine();
-                    Console.WriteLine(
+                    Logger.LogDebug(
                         "These files may be locked by another process.");
                 }
 
@@ -504,11 +493,11 @@ namespace Scanner
             }
             catch (Exception ex)
             {
-                Console.WriteLine();
-                Console.WriteLine(
+
+                Logger.Error(
                     "ERROR DURING PUBLIC COMPUTER CLEANUP");
 
-                Console.WriteLine(
+                Logger.Error(
                     ex.ToString());
             }
         }

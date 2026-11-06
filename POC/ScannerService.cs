@@ -58,10 +58,9 @@ namespace Scanner
             {
                 if (File.Exists(filePath))
                 {
-                    Console.WriteLine("GetFileSize");
+                    Logger.LogDebug("GetFileSize");
                     using (var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                     {
-                        Console.WriteLine("here 4");
                         // Get the BMP file size 
                         bmpFileSize = fs.Length;
                     }
@@ -70,7 +69,7 @@ namespace Scanner
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Failed to parse image headers safely: {ex.Message}");
+                Logger.Error($"Failed to parse image headers safely: {ex.Message}");
             }
             return bmpFileSize;
         }
@@ -81,7 +80,7 @@ namespace Scanner
 
         public void UpdateStatusCounters(String filePath)
         {
-            Console.WriteLine("*********************   ENTERED UpdateStatusCounters  DELETING FILE    **************************");
+            Logger.LogDebug("*********************   ENTERED UpdateStatusCounters  DELETING FILE    **************************");
 
             Globals.pageNumber--; // Decrements the internal counter
 
@@ -102,7 +101,7 @@ namespace Scanner
 
                         if (fs.Length >= 30)
                         {
-                            Console.WriteLine("Getting height and width");
+                            Logger.LogDebug("Getting height and width");
                             byte[] headerBuffer = new byte[30];
                             fs.Read(headerBuffer, 0, 30);
 
@@ -112,10 +111,10 @@ namespace Scanner
 
                         }
 
-                        Console.WriteLine("bmpFileSize BEFORE: " + bmpFileSize);
+                        Logger.LogDebug("bmpFileSize BEFORE: " + bmpFileSize);
                         // have size be negative to that it can be subtracted.
                         bmpFileSize = bmpFileSize - (bmpFileSize*2);
-                        Console.WriteLine("bmpFileSize AFTER: " + bmpFileSize);
+                        Logger.LogDebug("bmpFileSize AFTER: " + bmpFileSize);
                         
                         //Globals.GetFriendlyImageSize();
                         UpdateEstimatePDFSize(bmpFileSize, width, height);
@@ -124,10 +123,10 @@ namespace Scanner
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Failed to parse image headers safely: {ex.Message}");
+                Logger.Error($"Failed to parse image headers safely: {ex.Message}");
             }
 
-            Console.WriteLine("*********************   EXITED UpdateStatusCounters  DELETING FILE    **************************");
+            Logger.LogDebug("*********************   EXITED UpdateStatusCounters  DELETING FILE    **************************");
 
         }
 
@@ -148,18 +147,18 @@ namespace Scanner
 
                 Directory.CreateDirectory(
                     scansDirectory);
-                Console.WriteLine("Directory.CreateDirectory(scansDirectory)  " + scansDirectory);
+                Logger.LogDebug("Directory.CreateDirectory(scansDirectory)  " + scansDirectory);
 
                 Globals.scanSessionDirectory =
                     Path.Combine(
                         scansDirectory,
                         "Session_" + timestamp);
 
-                Console.WriteLine("scanSessionDirectory  " + Globals.scanSessionDirectory);
+                Logger.LogDebug("scanSessionDirectory  " + Globals.scanSessionDirectory);
                 Directory.CreateDirectory(
                     Globals.scanSessionDirectory);
 
-                Console.WriteLine("Directory Created scanSessionDirectory  " + Globals.scanSessionDirectory);
+                Logger.LogDebug("Directory Created scanSessionDirectory  " + Globals.scanSessionDirectory);
                 Globals.pdfFilePath =
                     Path.Combine(
                         scansDirectory,
@@ -167,33 +166,31 @@ namespace Scanner
                         timestamp +
                         ".pdf");
 
-                Console.WriteLine("Globals.pdfFilePath  " + Globals.pdfFilePath);
+                Logger.LogDebug("Globals.pdfFilePath  " + Globals.pdfFilePath);
                 Globals.pageNumber = 0;
                 Globals.totalImageBytes = 0;
                
 
 
                 // Create TWAIN session.
-                Console.WriteLine("About to Create TWAIN session.");
+                Logger.LogDebug("About to Create TWAIN session.");
                 twain =
                     new TwainSession(
                         TWIdentity.CreateFromAssembly(
                             DataGroups.Image,
                             typeof(ScannerService).Assembly));
-                Console.WriteLine("SUCCESSFULLY Created TWAIN session.");
+                Logger.LogDebug("SUCCESSFULLY Created TWAIN session.");
                 twain.Open();
                 
 
-                Console.WriteLine(
+                Logger.LogDebug(
                     "TWAIN Data Source Manager opened successfully.");
-
-                Console.WriteLine();
 
 
                 // Find scanner.
                 foreach (var source in twain)
                 {
-                    Console.WriteLine(
+                    Logger.LogDebug(
                         $"TWAIN source: {source.Name}");
 
                     if (source.Name.Equals(
@@ -208,19 +205,17 @@ namespace Scanner
                 if (scanner == null)
                 {
 
-                    Console.WriteLine(
-                        $"ERROR: Scanner '{scannerName}' " +
+                    Logger.Error(
+                        $"Scanner '{scannerName}' " +
                         "was not found.");
                     CleanupAfterOpenFailure();
                     return false;
                 }
 
-
-                Console.WriteLine();
-                Console.WriteLine(
+                Logger.LogDebug(
                     $"Scanner found: {scanner.Name}");
 
-                Console.WriteLine(
+                Logger.LogDebug(
                     "Opening scanner...");
 
 
@@ -230,14 +225,14 @@ namespace Scanner
 
                 if (result != ReturnCode.Success)
                 {
-                    Console.WriteLine(
-                        "ERROR: Scanner could not be opened.");
+                    Logger.Error(
+                        "Scanner could not be opened.");
                     CleanupAfterOpenFailure();
                     return false;
                 }
 
 
-                Console.WriteLine(
+                Logger.LogDebug(
                     "Scanner opened successfully.");
 
 
@@ -261,10 +256,7 @@ namespace Scanner
                 twain.SourceDisabled +=
                     Twain_SourceDisabled;
 
-
-                Console.WriteLine();
-
-                Console.WriteLine(
+                Logger.LogDebug(
                     "Scanner event handlers installed.");
 
                 return true;
@@ -304,8 +296,8 @@ namespace Scanner
         {
             if (!IsScannerOpen)
             {
-                Console.WriteLine(
-                    "ERROR: Scanner is not open.");
+                Logger.Error(
+                    "Scanner is not open.");
 
                 return false;
             }
@@ -319,7 +311,7 @@ namespace Scanner
                     scanner.Capabilities.ICapXResolution
                         .SetValue(resolution);
 
-                Console.WriteLine(
+                Logger.LogDebug(
                     $"X Resolution Result: {result}");
 
                 if (result != ReturnCode.Success)
@@ -341,7 +333,7 @@ namespace Scanner
                     scanner.Capabilities.ICapYResolution
                         .SetValue(resolution);
 
-                Console.WriteLine(
+                Logger.LogDebug(
                     $"Y Resolution Result: {result}");
 
                 if (result != ReturnCode.Success)
@@ -365,7 +357,7 @@ namespace Scanner
                     scanner.Capabilities.ICapPixelType
                         .SetValue(pixelType);
 
-                Console.WriteLine(
+                Logger.LogDebug(
                     $"Pixel Type Result: {result}");
 
                 if (result != ReturnCode.Success)
@@ -396,8 +388,7 @@ namespace Scanner
         {
             if (!IsScannerOpen)
             {
-                Console.WriteLine(
-                    "ERROR: Scanner is not open.");
+                Logger.Error("Scanner is not open.");
 
                 return false;
             }
@@ -427,7 +418,7 @@ namespace Scanner
                     frameCapability.SetValue(frame);
 
 
-                Console.WriteLine(
+                Logger.LogDebug(
                     $"Frame Set Result: {result}");
 
 
@@ -449,7 +440,7 @@ namespace Scanner
         {
             if (!IsScannerOpen)
             {
-                Console.WriteLine(
+                Logger.LogDebug(
                     "ERROR: Scanner is not open.");
 
                 return false;
@@ -458,17 +449,16 @@ namespace Scanner
             try
             {
                 
-                Console.WriteLine();
-                Console.WriteLine(
+                Logger.LogDebug(
                     "========================================");
 
-                Console.WriteLine(
+                Logger.LogDebug(
                     "STARTING SCAN BATCH");
 
-                Console.WriteLine(
+                Logger.LogDebug(
                     "========================================");
 
-                Console.WriteLine(
+                Logger.LogDebug(
                     $"Pages already scanned: {Globals.pageNumber}");
 
 
@@ -484,21 +474,21 @@ namespace Scanner
                         IntPtr.Zero);
 
 
-                Console.WriteLine(
+                Logger.LogDebug(
                     $"Scanner Enable Result: {result}");
-                Console.WriteLine(
+                Logger.LogDebug(
                    "---------------------");
 
                 if (result != ReturnCode.Success)
                 {
-                    Console.WriteLine(
+                    Logger.Error(
                         "ERROR: Scanner could not be enabled.");
 
                     return false;
                 }
 
 
-                Console.WriteLine(
+                Logger.LogDebug(
                     "Scanner acquisition started.");
 
                 return true;
@@ -518,8 +508,7 @@ namespace Scanner
             object sender,
             EventArgs e)
         {
-            Console.WriteLine();
-            Console.WriteLine(
+            Logger.LogDebug(
                 "TWAIN: TransferReady");
         }
 
@@ -531,20 +520,18 @@ namespace Scanner
             object sender,
             DataTransferredEventArgs e)
         {
-            Console.WriteLine("****************  ENTERED Twain_DataTransferred *************************");
+            Logger.LogDebug("****************  ENTERED Twain_DataTransferred *************************");
             try
             {
                 Globals.pageNumber++;
 
-
-                Console.WriteLine();
-                Console.WriteLine(
+                Logger.LogDebug(
                     "========================================");
 
-                Console.WriteLine(
+                Logger.LogDebug(
                     $"PAGE {Globals.pageNumber} RECEIVED");
 
-                Console.WriteLine(
+                Logger.LogDebug(
                     "========================================");
 
 
@@ -603,7 +590,7 @@ namespace Scanner
 
                             // Extract Bits Per Pixel (Offset 28)
                             ushort bitsPerPixel = BitConverter.ToUInt16(headerBuffer, 28);
-                            Console.WriteLine("Twain_DataTransferred   bitsPerPixel:" + bitsPerPixel);
+                            Logger.LogDebug("Twain_DataTransferred   bitsPerPixel:" + bitsPerPixel);
                         }
 
                         UpdateEstimatePDFSize( bmpFileSize,  width,  height);
@@ -612,20 +599,17 @@ namespace Scanner
                 }
 
 
-                Console.WriteLine(
+                Logger.LogDebug(
                     $"Saved temporary image:");
 
-                Console.WriteLine(
+                Logger.LogDebug(
                     imagePath);
 
                 // Notify UI that one page was scanned.
                 PageScanned?.Invoke(
                     this,
                     imagePath);
-                
-                //Console.WriteLine("Estimated file size: " + Globals.GetFriendlyImageSize());
-
-
+               
 
             }
             catch (Exception ex)
@@ -636,7 +620,7 @@ namespace Scanner
                     ex);
             }
 
-            Console.WriteLine("****************  EXITED Twain_DataTransferred *************************");
+            Logger.LogDebug("****************  EXITED Twain_DataTransferred *************************");
 
         }
 
@@ -645,7 +629,7 @@ namespace Scanner
         // =========================================================
         private void UpdateEstimatePDFSize(long bmpFileSize, int width, int height)
         {
-            Console.WriteLine("*********************   ENTERED UpdateEstimatePDFSize     **************************");
+            Logger.LogDebug("*********************   ENTERED UpdateEstimatePDFSize     **************************");
 
             string colorMode = Globals.scanSelectedScanMode;
             double factor = 1; // Default to color factor
@@ -657,7 +641,7 @@ namespace Scanner
 
             if (Globals.selectedDPI == Globals.StandardTextScanResolutionDpi)
             {
-                Console.WriteLine("STANDARD text resolution DPI");
+                Logger.LogDebug("STANDARD text resolution DPI");
 
                 dpiWidth = 1900;
                 dpiHeight = 2400;
@@ -674,12 +658,12 @@ namespace Scanner
                         // Page larger size factor estimate
                         factor = 0.15;
                     }
-                    Console.WriteLine("Black and white text factor " + factor);
+                    Logger.LogDebug("Black and white text factor " + factor);
                 }
             }
             else if (Globals.selectedDPI == Globals.HighTextScanResolutionDpi)
             {
-                Console.WriteLine("HIGH text resolution DPI");
+                Logger.LogDebug("HIGH text resolution DPI");
 
                 dpiWidth = 2800;
                 dpiHeight = 3500;
@@ -696,12 +680,12 @@ namespace Scanner
                         // Larger page size factor estimate
                         factor = 0.14;
                     }
-                    Console.WriteLine("Black and white Text factor " + factor);
+                    Logger.LogDebug("Black and white Text factor " + factor);
                 }
             }
             else if (Globals.selectedDPI == Globals.StandardScanResolutionDpi)
             {
-                Console.WriteLine("STANDARD resolution DPI");
+                Logger.LogDebug("STANDARD resolution DPI");
                 // Low resolution DPI, Height and Width Settings
                 dpiWidth = 1400;
                 dpiHeight = 1800;
@@ -718,7 +702,7 @@ namespace Scanner
                         // Larger page size factor estimate
                         factor = 0.25;
                     }
-                    Console.WriteLine("Black and white factor " + factor);
+                    Logger.LogDebug("Black and white factor " + factor);
                 }
                 else if (colorMode == "Grayscale")  // Tested Good
                 {
@@ -732,7 +716,7 @@ namespace Scanner
                         // Larger page size factor estimate
                         factor = 0.63;
                     }
-                    Console.WriteLine("****   Grascale factor  *****" + factor);
+                    Logger.LogDebug("****   Grascale factor  *****" + factor);
                 }
                 else if (colorMode == "Color")   // Tested Good - testing
                 {
@@ -746,12 +730,12 @@ namespace Scanner
                         // Larger page size factor estimate
                         factor = 0.74;
                     }
-                    Console.WriteLine("****  Color factor *****" + factor);
+                    Logger.LogDebug("****  Color factor *****" + factor);
                 }
             }
             else
             {
-                Console.WriteLine("HIGH resolution DPI");
+                Logger.LogDebug("HIGH resolution DPI");
             
                 dpiWidth = 1300;
                 dpiHeight = 1700;
@@ -768,7 +752,7 @@ namespace Scanner
                         // Larger page size factor estimate
                         factor = 0.25;
                     }
-                    Console.WriteLine("Black and white factor " + factor);
+                    Logger.LogDebug("Black and white factor " + factor);
                 }
                 else if (colorMode == "Grayscale")  // Tested Good
                 {
@@ -782,7 +766,7 @@ namespace Scanner
                         // Larger page size factor estimate
                         factor = 0.52;
                     }
-                    Console.WriteLine("****   Grascale factor  *****" + factor);
+                    Logger.LogDebug("****   Grascale factor  *****" + factor);
                 }
                 else if (colorMode == "Color")   // Tested Good - testing
                 {
@@ -796,7 +780,7 @@ namespace Scanner
                         // Larger page size factor estimate
                         factor = 0.74;
                     }
-                    Console.WriteLine("****  Color factor *****" + factor);
+                    Logger.LogDebug("****  Color factor *****" + factor);
                 }
 
             }
@@ -808,16 +792,16 @@ namespace Scanner
             Globals.totalImageMB = Globals.totalImageBytes / (1024.0 * 1024.0);
             Globals.totalEstImageBytes += (long)(bmpFileSize * factor);
 
-            Console.WriteLine($"selectedDPI {Globals.selectedDPI} height {height} width {width}");
-            Console.WriteLine($"bmpFileSize {bmpFileSize} currentImageSizeKB {Globals.currentImageSizeKB}");
-            Console.WriteLine($"totalImageBytes {Globals.totalImageBytes}");
-            Console.WriteLine($"totalImageKB {Globals.totalImageKB}");
-            Console.WriteLine($"totalImageMB {Globals.totalImageMB}");
-            Console.WriteLine($"totalEstImageBytes {Globals.totalEstImageBytes}");
-            Console.WriteLine($"totalEstImageBytes {Globals.GetFriendlyImageSize()}");
-            Console.WriteLine($"scanSelectedScanMode {Globals.scanSelectedScanMode}");
+            Logger.LogDebug($"selectedDPI {Globals.selectedDPI} height {height} width {width}");
+            Logger.LogDebug($"bmpFileSize {bmpFileSize} currentImageSizeKB {Globals.currentImageSizeKB}");
+            Logger.LogDebug($"totalImageBytes {Globals.totalImageBytes}");
+            Logger.LogDebug($"totalImageKB {Globals.totalImageKB}");
+            Logger.LogDebug($"totalImageMB {Globals.totalImageMB}");
+            Logger.LogDebug($"totalEstImageBytes {Globals.totalEstImageBytes}");
+            Logger.LogDebug($"totalEstImageBytes {Globals.GetFriendlyImageSize()}");
+            Logger.LogDebug($"scanSelectedScanMode {Globals.scanSelectedScanMode}");
             
-            Console.WriteLine("*********************   EXITED UpdateEstimatePDFSize     **************************");
+            Logger.LogDebug("*********************   EXITED UpdateEstimatePDFSize     **************************");
         }
         
         // =========================================================
@@ -828,22 +812,19 @@ namespace Scanner
             object sender,
             EventArgs e)
         {
-            Console.WriteLine();
-            Console.WriteLine(
+            Logger.LogDebug(
                 "========================================");
 
-            Console.WriteLine(
+            Logger.LogDebug(
                 "TWAIN: SourceDisabled");
 
-            Console.WriteLine(
+            Logger.LogDebug(
                 "CURRENT BATCH COMPLETE");
 
-            Console.WriteLine(
+            Logger.LogDebug(
                 "========================================");
 
-            Console.WriteLine();
-
-            Console.WriteLine(
+            Logger.LogDebug(
                 $"Total pages so far: {Globals.pageNumber}");
 
 
@@ -867,11 +848,10 @@ namespace Scanner
             object sender,
             EventArgs e)
         {
-            Console.WriteLine();
-            Console.WriteLine(
+            Logger.LogDebug(
                 "TWAIN: TransferCanceled");
 
-            Console.WriteLine(
+            Logger.LogDebug(
                 $"Pages received: {Globals.pageNumber}");
 
             ScanCanceled?.Invoke(
@@ -889,8 +869,7 @@ namespace Scanner
             object sender,
             EventArgs e)
         {
-            Console.WriteLine();
-            Console.WriteLine(
+            Logger.LogDebug(
                 "TWAIN: TransferError");
 
             ReportError(
@@ -902,7 +881,7 @@ namespace Scanner
         // =========================================================
         public string CreateFinalPdf()
         {
-            Console.WriteLine("**************   ENTERED CreateFinalPdf *************");
+            Logger.LogDebug("**************   ENTERED CreateFinalPdf *************");
 
             if (Globals.pageNumber == 0)
             {
@@ -921,17 +900,14 @@ namespace Scanner
                 Globals.pdfFilePath;
 
 
-            Console.WriteLine();
-            Console.WriteLine(
+            Logger.LogDebug(
                 "========================================");
 
-            Console.WriteLine(
+            Logger.LogDebug(
                 "CREATING FINAL PDF");
 
-            Console.WriteLine(
+            Logger.LogDebug(
                 "========================================");
-
-            Console.WriteLine();
 
 
             try
@@ -952,8 +928,8 @@ namespace Scanner
 
                     if (!File.Exists(imagePath))
                     {
-                        Console.WriteLine(
-                            $"WARNING: Missing page " +
+                        Logger.Warning(
+                            $"Missing page " +
                             $"{i}: {imagePath}");
 
                         continue;
@@ -967,7 +943,7 @@ namespace Scanner
                         double dpiX = image.HorizontalResolution;
                         double dpiY = image.VerticalResolution;
 
-                        Console.WriteLine($"IMAGE dpiX HorizontalResolution = {dpiX}   dpiY VerticalResolution = {dpiY}");
+                        Logger.LogDebug($"IMAGE dpiX HorizontalResolution = {dpiX}   dpiY VerticalResolution = {dpiY}");
 
                         // Use a reasonable fallback for invalid DPI values.
                         if (double.IsNaN(dpiX) ||
@@ -975,7 +951,7 @@ namespace Scanner
                             dpiX < 50 || dpiX > 1200)
                         {
                             dpiX = 300.0;
-                            Console.WriteLine($"fallback dpiX HorizontalResolution = {dpiX}");
+                            Logger.LogDebug($"fallback dpiX HorizontalResolution = {dpiX}");
                         }
 
                         if (double.IsNaN(dpiY) ||
@@ -983,24 +959,24 @@ namespace Scanner
                             dpiY < 50 || dpiY > 1200)
                         {
                             dpiY = 300.0;
-                            Console.WriteLine($"fallback dpiY VerticalResolution = {dpiY}");
+                            Logger.LogDebug($"fallback dpiY VerticalResolution = {dpiY}");
                         }
 
                         double widthPoints = image.Width / dpiX * 72.0;
                         double heightPoints = image.Height / dpiY * 72.0;
                         
-                        Console.WriteLine($"widthPoints  {widthPoints} =  image.Width {image.Width} / dpix {dpiX} * 72.0");
-                        Console.WriteLine($"heightPoints  {heightPoints} =  image.Width {image.Height} / dpiY {dpiY} * 72.0");
+                        Logger.LogDebug($"widthPoints  {widthPoints} =  image.Width {image.Width} / dpix {dpiX} * 72.0");
+                        Logger.LogDebug($"heightPoints  {heightPoints} =  image.Width {image.Height} / dpiY {dpiY} * 72.0");
 
                         PdfPage page = document.AddPage();
 
                         page.Width = XUnit.FromPoint(widthPoints);
                         page.Height = XUnit.FromPoint(heightPoints);
-                        Console.WriteLine($"page.Width   {page.Width}");
-                        Console.WriteLine($"page.Height  {page.Height}");
+                        Logger.LogDebug($"page.Width   {page.Width}");
+                        Logger.LogDebug($"page.Height  {page.Height}");
 
-                        Console.WriteLine($"page.Width.Point   {page.Width.Point}");
-                        Console.WriteLine($"page.Height.Point  {page.Height.Point}");
+                        Logger.LogDebug($"page.Width.Point   {page.Width.Point}");
+                        Logger.LogDebug($"page.Height.Point  {page.Height.Point}");
 
                         using (
                             XGraphics graphics =
@@ -1015,13 +991,12 @@ namespace Scanner
                                 0,
                                 page.Width.Point,
                                 page.Height.Point);
-                            Console.WriteLine($"xImage = {xImage.Size}");
-                            //Console.WriteLine($"page.Size = {page.Size}");
+                            Logger.LogDebug($"xImage = {xImage.Size}");
                         }
                     }
 
 
-                    Console.WriteLine(
+                    Logger.LogDebug(
                         $"Added page {i} to PDF.");
                 }
 
@@ -1030,16 +1005,14 @@ namespace Scanner
                 {
                     // Add pages and images here.
                     document.Save(finalPdf);
-                    Console.WriteLine($"document.FileSize = {document.FileSize}");
+                    Logger.LogDebug($"document.FileSize = {document.FileSize}");
                 }
 
 
-                Console.WriteLine();
-
-                Console.WriteLine(
+                Logger.LogDebug(
                     "PDF CREATED:");
 
-                Console.WriteLine(
+                Logger.LogDebug(
                     finalPdf);
 
 
@@ -1052,9 +1025,9 @@ namespace Scanner
                 Globals.totalEstImageBytes = 0;
                 Globals.totalImageKB = 0;
                 Globals.totalImageMB = 0;
-                Console.WriteLine($"Before Resetting to 0 ---  pageNumber={Globals.pageNumber} totalImageBytes={Globals.totalImageBytes} totalEstImageBytes={Globals.totalEstImageBytes} totalImageKB={Globals.totalImageKB} totalImageMegaBytes {Globals.totalImageMB}");
+                Logger.LogDebug($"Before Resetting to 0 ---  pageNumber={Globals.pageNumber} totalImageBytes={Globals.totalImageBytes} totalEstImageBytes={Globals.totalEstImageBytes} totalImageKB={Globals.totalImageKB} totalImageMegaBytes {Globals.totalImageMB}");
 
-                Console.WriteLine("**************   EXITED CreateFinalPdf *************");
+                Logger.LogDebug("**************   EXITED CreateFinalPdf *************");
 
                 return finalPdf;
             }
@@ -1066,7 +1039,7 @@ namespace Scanner
                     "Could not create final PDF.\r\n\r\n" +
                     ex.Message);
 
-                Console.WriteLine("**************   EXITED CreateFinalPdf *************");
+                Logger.LogDebug("**************   EXITED CreateFinalPdf *************");
 
                 return null;
             }
@@ -1133,8 +1106,7 @@ namespace Scanner
         private void ReportError(
             string message)
         {
-            Console.WriteLine();
-            Console.WriteLine(message);
+            Logger.Error(message);
 
             ScanError?.Invoke(
                 null,
@@ -1147,11 +1119,10 @@ namespace Scanner
 
         public void Close()
         {
-            Console.WriteLine();
-            Console.WriteLine(
+            Logger.LogDebug(
                 "CLOSING SCANNER SERVICE");
 
-            Console.WriteLine(
+            Logger.LogDebug(
                 $"Final page count: {Globals.pageNumber}");
 
             try
@@ -1187,12 +1158,12 @@ namespace Scanner
                 if (scanner != null &&
                     scanner.IsOpen)
                 {
-                    Console.WriteLine(
+                    Logger.LogDebug(
                         "Closing scanner data source...");
 
                     scanner.Close();
 
-                    Console.WriteLine(
+                    Logger.LogDebug(
                         "Scanner data source closed.");
                 }
             }
@@ -1208,12 +1179,12 @@ namespace Scanner
                 if (twain != null &&
                     twain.IsDsmOpen)
                 {
-                    Console.WriteLine(
+                    Logger.LogDebug(
                         "Closing TWAIN DSM...");
 
                     twain.Close();
 
-                    Console.WriteLine(
+                    Logger.LogDebug(
                         "TWAIN DSM closed.");
                 }
             }
@@ -1227,7 +1198,7 @@ namespace Scanner
             scanner = null;
             twain = null;
 
-            Console.WriteLine(
+            Logger.LogDebug(
                 "SCANNER SERVICE CLOSED.");
         }
 

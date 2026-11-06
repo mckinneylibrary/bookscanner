@@ -16,13 +16,20 @@ namespace Scanner
 {
     /**
      * 
-     * Logger.Log(message);
+     * All Loggers print to console if App.config LoggerDebug is set to true
+     * 
+     * LogDebug is true logs to log files when App.config debug is true, 
+     * if LogDebug is false this will NOT log information to file either.
+     * Logger.LogDebug(message);
+     * 
+     * Allways logs to log files.
+     * Logger.Info(message);
      * Logger.Error(message);
      * Logger.Warning(message);
      * Logger.Exception(ex, "ERROR DURING FORM CLOSING CLEANUP: " + ex);
      * 
      */
-    
+
 
     public static class Logger
     {
@@ -70,18 +77,19 @@ namespace Scanner
 
                 _initialized = true;
 
-                Log("==================================================");
-                Log("Application started");
-                Log("Application: " + appName);
-                Log("Log file: " + _logFilePath);
-                Log("==================================================");
+                Logger.Info("==================================================");
+                Logger.Info("Application started");
+                Logger.Info("Application: " + appName);
+                Logger.Info("Log file: " + _logFilePath);
+                Logger.Info("==================================================");
 
                 // Capture Console.WriteLine and Console.Error.WriteLine.
-                if (LoggerDebug)
+                if (!LoggerDebug)
                 {
                     Console.SetOut(new LogTextWriter(Console.Out, false));
+                    Console.SetError(new LogTextWriter(Console.Error, true));
                 }
-                Console.SetError(new LogTextWriter(Console.Error, true));
+                
 
                 // Capture Debug.WriteLine and Trace.WriteLine.
                 Debug.Listeners.Add(new LogTraceListener());
@@ -99,7 +107,7 @@ namespace Scanner
                 // This can be updated and application restarted for change to take effect
                 int LogCutoffDays = int.Parse(ConfigurationManager.AppSettings["LogCutoffDays"]);
                 DateTime cutoffDate = DateTime.Now.AddDays(-LogCutoffDays);
-                Log($"DeleteOldLogFiles cutoffDate {cutoffDate}");
+                Logger.Info($"DeleteOldLogFiles cutoffDate {cutoffDate}");
 
                 foreach (string file in Directory.GetFiles(
                     logDirectory, "application_*.log"))
@@ -159,22 +167,42 @@ namespace Scanner
                     "Log cleanup failed: " + ex.Message);
             }
         }
-        public static void Log(string message)
+        public static void LogDebug(string message)
         {
             if (LoggerDebug)
             {
-                Write("INFO", message);
+                Write("DEBUG", message);
+                Console.WriteLine($"[DEBUG] {message}");
             }
+        }
+
+        public static void Info(string message)
+        {
+            Write("INFO", message);
+            if (LoggerDebug)
+            {
+                Console.WriteLine($"[INFO] {message}");
+            }
+
         }
 
         public static void Warning(string message)
         {
             Write("WARN", message);
+            if (LoggerDebug)
+            {
+                Console.WriteLine($"[WARN] {message}");
+            }
         }
 
         public static void Error(string message)
         {
             Write("ERROR", message);
+            if (LoggerDebug)
+            {
+                Console.WriteLine($"[ERROR] {message}");
+            }
+
         }
 
         public static void Exception(Exception ex, string message = "")
@@ -183,7 +211,12 @@ namespace Scanner
                 ? ex.ToString()
                 : message + Environment.NewLine + ex;
 
-            Write("ERROR", details);
+            Write("EXCEPTION", details);
+            if (LoggerDebug)
+            {
+                Console.WriteLine($"[EXCEPTION] {details}");
+            }
+
         }
 
         private static void Write(string level, string message)
@@ -304,7 +337,7 @@ namespace Scanner
                 if (_isError)
                     Logger.Error(message);
                 else
-                    Logger.Log(message);
+                    Logger.Info(message);
             }
         }
 
@@ -315,12 +348,12 @@ namespace Scanner
                 // Trace.Write can send partial messages.
                 // WriteLine below records completed messages.
                 if (!string.IsNullOrEmpty(message))
-                    Logger.Log("[Debug/Trace] " + message);
+                    Logger.Info("[Debug/Trace] " + message);
             }
 
             public override void WriteLine(string message)
             {
-                Logger.Log("[Debug/Trace] " + (message ?? string.Empty));
+                Logger.Info("[Debug/Trace] " + (message ?? string.Empty));
             }
         }
     }
