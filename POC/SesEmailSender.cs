@@ -96,6 +96,8 @@ namespace Scanner
                                 progressForm.Show();
                                 var response = await ses.SendRawEmailAsync(request, cts.Token);
                                 progressForm.Close();
+                                Logger.LogDebug($"Successfully sent email - confirmation MessageId {response.MessageId}");
+
                                 return response.MessageId;
                             }
 

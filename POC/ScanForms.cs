@@ -82,8 +82,10 @@ namespace Scanner
 
         // ************  UI configuration ************  
         // Main Windows Form Width and Hight
-        private readonly int appFormWidth = 1900;  
-        private readonly static int appFormHeight = 1000; 
+        //private readonly int appFormWidth = 1900;  //  PROD
+        //private readonly static int appFormHeight = 1000;   // PROD
+        private readonly int appFormWidth = 1400;   // TEST
+        private readonly static int appFormHeight = 800;  //TEST
 
         // mainAppPanel Width and Hight
         private readonly static int mainAppPanelWidth = 1800;
@@ -154,10 +156,17 @@ namespace Scanner
             Text =
                 "City of McKinney Public Library Scanner";
 
-            // Configuration.
-            //this.WindowState = FormWindowState.Normal; // Testing
-            this.WindowState = FormWindowState.Maximized; // Production 
-            this.StartPosition = FormStartPosition.CenterScreen;
+            // TESTING Configuration.
+            this.WindowState = FormWindowState.Normal; // Testing
+            //this.StartPosition = FormStartPosition.CenterScreen;  // testing
+            this.StartPosition = FormStartPosition.Manual;   //Testing
+            this.Location = new Point(
+                500,
+                Screen.PrimaryScreen.WorkingArea.Top
+                );   // testing
+
+
+            //this.WindowState = FormWindowState.Maximized; // Production
             this.FormBorderStyle = FormBorderStyle.None;
             this.Size = new Size(appFormWidth, appFormHeight);
             this.AutoScroll = true;
@@ -565,7 +574,7 @@ namespace Scanner
             // DPI
             dpiGroup = new GroupBox
             {
-                Text = "Select Dots Per Inch (DPI)",
+                Text = "Select Resolution",
                 Width = GroupWidth,
                 Height = GroupHeight,
                 Location = new Point(Column1, Row6),
@@ -1530,10 +1539,22 @@ namespace Scanner
             {   
                 if (blackWhiteTextRadioButton.Checked)
                 {
-                    return Globals.StandardTextScanResolutionDpi;
-                } else
+                    return Globals.StandardBWTextScanResolutionDpi;
+                } else if (blackWhiteIMGRadioButton.Checked)
                 {
-                    return Globals.StandardScanResolutionDpi;
+                    return Globals.StandardBWImageScanResolutionDpi;
+                }
+                else if (grayscaleRadioButton.Checked)
+                {
+                    return Globals.StandardGrayscaleScanResolutionDpi;
+                }
+                else if (colorRadioButton.Checked)
+                {
+                    return Globals.StandardColorScanResolutionDpi;
+                }
+                else
+                {
+                    return Globals.StandardColorScanResolutionDpi;
                 }
                     
             }
@@ -1542,16 +1563,31 @@ namespace Scanner
             {
                 if (blackWhiteTextRadioButton.Checked)
                 {
-                    return Globals.HighTextScanResolutionDpi;
+                    return Globals.HighBWTextScanResolutionDpi;
+                }
+                else if (blackWhiteIMGRadioButton.Checked)
+                {
+                    return Globals.HighBWImageScanResolutionDpi;
+                }
+                else if (grayscaleRadioButton.Checked)
+                {
+                    return Globals.HighGrayscaleScanResolutionDpi;
+                }
+                else if (colorRadioButton.Checked)
+                {
+                    return Globals.HighColorScanResolutionDpi;
                 }
                 else
                 {
-                    return Globals.HighScanResolutionDpi;
+                    return Globals.HighColorScanResolutionDpi;
                 }
-                
+
             }
             else
-                return Globals.StandardScanResolutionDpi;
+            {
+                return Globals.StandardColorScanResolutionDpi;
+            }
+
         }
 
 

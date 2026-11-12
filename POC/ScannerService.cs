@@ -116,7 +116,6 @@ namespace Scanner
                         bmpFileSize = bmpFileSize - (bmpFileSize*2);
                         Logger.LogDebug("bmpFileSize AFTER: " + bmpFileSize);
                         
-                        //Globals.GetFriendlyImageSize();
                         UpdateEstimatePDFSize(bmpFileSize, width, height);
                     }
                 }
@@ -639,149 +638,172 @@ namespace Scanner
             int dpiWidth = width;
             int dpiHeight = height;
 
-            if (Globals.selectedDPI == Globals.StandardTextScanResolutionDpi)
-            {
-                Logger.LogDebug("STANDARD text resolution DPI");
+            Logger.LogDebug($"PASSED IN - dpiWidth {dpiWidth}  dpiHeight {dpiHeight}");
 
+            if (Globals.selectedDPI == Globals.StandardBWTextScanResolutionDpi  && colorMode == "BlackAndWhiteText")
+            {
                 dpiWidth = 1900;
                 dpiHeight = 2400;
+                Logger.LogDebug($"USING - dpiWidth {dpiWidth}  dpiHeight {dpiHeight}");
 
-                if (colorMode == "BlackAndWhiteText") 
+                // Letter Size
+                if ((height < dpiHeight && width < dpiWidth) || (height < dpiWidth && width < dpiHeight))
                 {
-                    // Letter Size
-                    if ((height < dpiHeight && width < dpiWidth) || (height < dpiWidth && width < dpiHeight))
-                    {
-                        factor = 0.08;
-                    }
-                    else
-                    {
-                        // Page larger size factor estimate
-                        factor = 0.15;
-                    }
-                    Logger.LogDebug("Black and white text factor " + factor);
+                    factor = 0.08;  // Tested
+                    Logger.LogDebug("Black and white Letter STD factor " + factor);
+                }
+                else
+                {
+                    // Page larger size factor estimate
+                    factor = 0.15;  // Tested
+                    Logger.LogDebug("Black and white Letter+ STD factor " + factor);
                 }
             }
-            else if (Globals.selectedDPI == Globals.HighTextScanResolutionDpi)
+            else if (Globals.selectedDPI == Globals.HighBWTextScanResolutionDpi && colorMode == "BlackAndWhiteText")
             {
-                Logger.LogDebug("HIGH text resolution DPI");
-
                 dpiWidth = 2800;
                 dpiHeight = 3500;
+                Logger.LogDebug($"USING - dpiWidth {dpiWidth}  dpiHeight {dpiHeight}");
 
-                if (colorMode == "BlackAndWhiteText")
+                // Letter page size factor estimate
+                if ((height < dpiHeight && width < dpiWidth) || (height < dpiWidth && width < dpiHeight))
                 {
-                    // Letter page size factor estimate
-                    if ((height < dpiHeight && width < dpiWidth) || (height < dpiWidth && width < dpiHeight))
-                    {
-                        factor = 0.06;
-                    }
-                    else
-                    {
-                        // Larger page size factor estimate
-                        factor = 0.14;
-                    }
-                    Logger.LogDebug("Black and white Text factor " + factor);
+                    factor = 0.085;  // Tested
+                    Logger.LogDebug("Black and white Letter HIGH Text factor " + factor);
+                }
+                else
+                {
+                    // Larger page size factor estimate
+                    factor = 0.15;   // Tested
+                    Logger.LogDebug("Black and white Letter+ HIGH Text factor " + factor);
                 }
             }
-            else if (Globals.selectedDPI == Globals.StandardScanResolutionDpi)
+            else if (Globals.selectedDPI == Globals.StandardBWImageScanResolutionDpi && colorMode == "BlackAndWhiteIMG")
             {
-                Logger.LogDebug("STANDARD resolution DPI");
-                // Low resolution DPI, Height and Width Settings
                 dpiWidth = 1400;
                 dpiHeight = 1800;
+                Logger.LogDebug($"USING - dpiWidth {dpiWidth}  dpiHeight {dpiHeight}");
 
-                if (colorMode == "BlackAndWhiteIMG")  // Tested Good
+                // Letter page size factor estimate
+                if ((height < dpiHeight && width < dpiWidth) || (height < dpiWidth && width < dpiHeight))
                 {
-                    // Letter page size factor estimate
-                    if ((height < dpiHeight && width < dpiWidth) || (height < dpiWidth && width < dpiHeight))
-                    {
-                        factor = 0.21;
-                    }
-                    else
-                    {
-                        // Larger page size factor estimate
-                        factor = 0.25;
-                    }
-                    Logger.LogDebug("Black and white factor " + factor);
+                    factor = 0.25;   // Tested
+                    Logger.LogDebug("Black and white image Letter STD factor " + factor);
                 }
-                else if (colorMode == "Grayscale")  // Tested Good
+                else
                 {
-                    // Letter page size factor estimate
-                    if ((height < dpiHeight && width < dpiWidth) || (height < dpiWidth && width < dpiHeight))
-                    {
-                        factor = 0.43;
-                    }
-                    else
-                    {
-                        // Larger page size factor estimate
-                        factor = 0.63;
-                    }
-                    Logger.LogDebug("****   Grascale factor  *****" + factor);
-                }
-                else if (colorMode == "Color")   // Tested Good - testing
-                {
-                    // Letter page size factor estimate
-                    if ((height < dpiHeight && width < dpiWidth) || (height < dpiWidth && width < dpiHeight))
-                    {
-                        factor = 0.65;
-                    }
-                    else
-                    {
-                        // Larger page size factor estimate
-                        factor = 0.74;
-                    }
-                    Logger.LogDebug("****  Color factor *****" + factor);
+                    // Larger page size factor estimate
+                    factor = 0.26;   // Tested
+                    Logger.LogDebug("Black and white image Letter+ STD factor " + factor);
                 }
             }
-            else
+            else if (Globals.selectedDPI == Globals.HighBWImageScanResolutionDpi && colorMode == "BlackAndWhiteIMG")
             {
-                Logger.LogDebug("HIGH resolution DPI");
-            
-                dpiWidth = 1300;
-                dpiHeight = 1700;
-                
-                if (colorMode == "BlackAndWhiteIMG")  // Tested Good
+                dpiWidth = 1500;
+                dpiHeight = 1900;
+                Logger.LogDebug($"USING - dpiWidth {dpiWidth}  dpiHeight {dpiHeight}");
+
+                // Letter page size factor estimate
+                if ((height < dpiHeight && width < dpiWidth) || (height < dpiWidth && width < dpiHeight))
                 {
-                    // Letter page size factor estimate
-                    if ((height < dpiHeight && width < dpiWidth) || (height < dpiWidth && width < dpiHeight))
-                    {
-                        factor = 0.21;
-                    }
-                    else
-                    {
-                        // Larger page size factor estimate
-                        factor = 0.25;
-                    }
-                    Logger.LogDebug("Black and white factor " + factor);
+                    factor = 0.21;   //  TESTED
+                    Logger.LogDebug("Black and white image letter HIGH factor " + factor);
                 }
-                else if (colorMode == "Grayscale")  // Tested Good
+                else
                 {
-                    // Letter page size factor estimate
-                    if ((height < dpiHeight && width < dpiWidth) || (height < dpiWidth && width < dpiHeight))
-                    {
-                        factor = 0.25;
-                    }
-                    else
-                    {
-                        // Larger page size factor estimate
-                        factor = 0.52;
-                    }
-                    Logger.LogDebug("****   Grascale factor  *****" + factor);
+                    // Larger page size factor estimate
+                    factor = 0.22;
+                    Logger.LogDebug("Black and white image letter+ HIGH factor " + factor);
                 }
-                else if (colorMode == "Color")   // Tested Good - testing
+            }
+            else if (Globals.selectedDPI == Globals.StandardGrayscaleScanResolutionDpi && colorMode == "Grayscale")
+            {
+                dpiWidth = 800;
+                dpiHeight = 1000;
+                Logger.LogDebug($"USING - dpiWidth {dpiWidth}  dpiHeight {dpiHeight}");
+
+                // Letter page size factor estimate
+                if ((height < dpiHeight && width < dpiWidth) || (height < dpiWidth && width < dpiHeight))
                 {
-                    // Letter page size factor estimate
-                    if ((height < dpiHeight && width < dpiWidth) || (height < dpiWidth && width < dpiHeight))
-                    {
-                        factor = 0.65;
-                    }
-                    else
-                    {
-                        // Larger page size factor estimate
-                        factor = 0.74;
-                    }
-                    Logger.LogDebug("****  Color factor *****" + factor);
+                    factor = 0.5;   // Tested with email
+                    Logger.LogDebug("****   Grascale STD ltr factor  *****" + factor);
                 }
+                else
+                {
+                    // Larger page size factor estimate
+                    factor = 0.69;      // Tested with email
+                    Logger.LogDebug("****   Grascale STD factor ltr + *****" + factor);
+                }
+
+            }
+            else if (Globals.selectedDPI == Globals.HighGrayscaleScanResolutionDpi && colorMode == "Grayscale")
+            {
+                dpiWidth = 1100;
+                dpiHeight = 1400;
+                Logger.LogDebug($"USING - dpiWidth {dpiWidth}  dpiHeight {dpiHeight}");
+
+                // Letter page size factor estimate
+                if ((height < dpiHeight && width < dpiWidth) || (height < dpiWidth && width < dpiHeight))
+                {
+                    factor = 0.48;  // Tested with email
+                    Logger.LogDebug("****  GrayScale Ltr HIGH factor *****" + factor);
+                }
+                else
+                {
+                    // Larger page size factor estimate
+                    factor = 0.65;   // Tested with email
+                    Logger.LogDebug("****  GrayScale Ltr+ HIGH factor *****" + factor);
+                }
+
+            }
+            else if (Globals.selectedDPI == Globals.StandardColorScanResolutionDpi && colorMode == "Color")
+            {
+
+                dpiWidth = 750;
+                dpiHeight = 1000;
+                Logger.LogDebug($"USING - dpiWidth {dpiWidth}  dpiHeight {dpiHeight}");
+
+                // Letter page size factor estimate
+                if ((height < dpiHeight && width < dpiWidth) || (height < dpiWidth && width < dpiHeight))
+                {
+                    factor = 0.76;   // Tested with email
+                    Logger.LogDebug("****  Color STD Ltr factor *****" + factor);
+                }
+                else
+                {
+                    // Larger page size factor estimate
+                    factor = 0.72;     // Tested with email
+                    Logger.LogDebug("****  Color STD Ltr+ factor *****" + factor);
+                }
+
+            }
+            else if (Globals.selectedDPI == Globals.HighColorScanResolutionDpi && colorMode == "Color")
+            {
+
+                dpiWidth = 750;
+                dpiHeight = 1000;
+                Logger.LogDebug($"USING - dpiWidth {dpiWidth}  dpiHeight {dpiHeight}");
+
+                // Letter page size factor estimate
+                if ((height < dpiHeight && width < dpiWidth) || (height < dpiWidth && width < dpiHeight))
+                {
+                    factor = 0.70;  // Tested with email
+                    Logger.LogDebug("****  Color Ltr HIGH factor *****" + factor);
+                }
+                else
+                {
+                    // Larger page size factor estimate
+                    factor = 0.69;    // Tested with email
+                    Logger.LogDebug("****  Color Ltr+ HIGH factor *****" + factor);
+                }
+
+            }
+            else 
+            {
+
+                Logger.LogDebug($"USING - dpiWidth {dpiWidth}  dpiHeight {dpiHeight}");
+                factor = 0.72;
+                Logger.LogDebug("Defaul factor " + factor);
 
             }
 
@@ -792,7 +814,7 @@ namespace Scanner
             Globals.totalImageMB = Globals.totalImageBytes / (1024.0 * 1024.0);
             Globals.totalEstImageBytes += (long)(bmpFileSize * factor);
 
-            Logger.LogDebug($"selectedDPI {Globals.selectedDPI} height {height} width {width}");
+            Logger.LogDebug($"selectedDPI {Globals.selectedDPI} width {width} height {height} ");
             Logger.LogDebug($"bmpFileSize {bmpFileSize} currentImageSizeKB {Globals.currentImageSizeKB}");
             Logger.LogDebug($"totalImageBytes {Globals.totalImageBytes}");
             Logger.LogDebug($"totalImageKB {Globals.totalImageKB}");

@@ -23,10 +23,21 @@ namespace Scanner
         public const int requiredSecurityClicks = 5;
         public const int requiredSecuritySeconds = 1;
         
-        public const double StandardScanResolutionDpi = 150.0;
-        public const double HighScanResolutionDpi = 200.0;
-        public const double StandardTextScanResolutionDpi = 200.0;
-        public const double HighTextScanResolutionDpi = 300.0;
+        // Grayscale          
+        public const double StandardGrayscaleScanResolutionDpi = 80.0;
+        public const double HighGrayscaleScanResolutionDpi = 110.0;
+
+        // Color scanning
+        public const double StandardColorScanResolutionDpi = 75.0;
+        public const double HighColorScanResolutionDpi = 79.0;
+
+        // Using these DPIs for Blan and White images,
+        public const double StandardBWImageScanResolutionDpi = 150.0;
+        public const double HighBWImageScanResolutionDpi = 160.0;
+
+        // Using these DPIs for Black and White Text Scanning
+        public const double StandardBWTextScanResolutionDpi = 200.0;
+        public const double HighBWTextScanResolutionDpi = 300.0;
 
 
         // Global static properties which value DO change
@@ -46,7 +57,7 @@ namespace Scanner
         public static int PDFMaxSize = int.Parse(ConfigurationManager.AppSettings["PDFMaxSize"]);
 
 
-        public static double selectedDPI = StandardTextScanResolutionDpi;
+        public static double selectedDPI = StandardBWTextScanResolutionDpi;
 
         public static Font boldUiFont;
         public static Font normalUiFont;
