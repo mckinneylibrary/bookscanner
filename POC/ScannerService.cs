@@ -649,13 +649,13 @@ namespace Scanner
                 // Letter Size
                 if ((height < dpiHeight && width < dpiWidth) || (height < dpiWidth && width < dpiHeight))
                 {
-                    factor = 0.08;  // Tested
+                    factor = 0.15;  // Tested
                     Logger.LogDebug("Black and white Letter STD factor " + factor);
                 }
                 else
                 {
                     // Page larger size factor estimate
-                    factor = 0.15;  // Tested
+                    factor = 0.2;  // Tested
                     Logger.LogDebug("Black and white Letter+ STD factor " + factor);
                 }
             }
@@ -668,13 +668,13 @@ namespace Scanner
                 // Letter page size factor estimate
                 if ((height < dpiHeight && width < dpiWidth) || (height < dpiWidth && width < dpiHeight))
                 {
-                    factor = 0.085;  // Tested
+                    factor = 0.09;  // Tested
                     Logger.LogDebug("Black and white Letter HIGH Text factor " + factor);
                 }
                 else
                 {
                     // Larger page size factor estimate
-                    factor = 0.15;   // Tested
+                    factor = 0.2;   // Tested
                     Logger.LogDebug("Black and white Letter+ HIGH Text factor " + factor);
                 }
             }

@@ -514,28 +514,6 @@ namespace Scanner
             }
 
 
-            // Confirm TO recipient email address
-            //using (ConfirmForm confirmForm =
-            //    new ConfirmForm(txtTo.Text.Trim()))
-            //{
-            //    DialogResult result = confirmForm.ShowDialog(this);
-
-            //    if (result != DialogResult.Yes)
-            //    {
-            //        txtTo.Focus();
-            //        txtTo.SelectAll();
-            //        return;
-            //    }
-            //}
-
-
-
-            //string FormNameText = "Confirm Email Address";
-            //string MessageText = "Please confirm that the recipient email address is correct:";
-            //string QuestionText = "Do you want to continue?";
-            //CreateConfirmForm(email, FormNameText, MessageText, QuestionText, DialogResult.Yes, MessageBoxIcon.Question);
-
-
             // if user entered something in the CC text field
             // validate email information.
             if (!string.IsNullOrWhiteSpace(txtCc.Text))
@@ -569,20 +547,6 @@ namespace Scanner
                     txtCc.SelectAll();
                     return;
                 }
-
-                //// Confirm CC recipient email address
-                //using (ConfirmForm confirmForm =
-                //new ConfirmForm(txtCc.Text.Trim()))
-                //{
-                //    DialogResult result = confirmForm.ShowDialog(this);
-
-                //    if (result != DialogResult.Yes)
-                //    {
-                //        txtCc.Focus();
-                //        txtCc.SelectAll();
-                //        return;
-                //    }
-                //}
 
             }
 
